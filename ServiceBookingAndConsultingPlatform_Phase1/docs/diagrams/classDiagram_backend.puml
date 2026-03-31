@@ -1,0 +1,319 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+
+package "model.user" {
+  abstract class User {
+    - userId : String
+    - name : String
+    - email : String
+  }
+
+  class Client
+  class Consultant {
+    - approvalStatus : ConsultantApprovalStatus
+    + isApproved() : boolean
+  }
+  class Admin
+
+  User <|-- Client
+  User <|-- Consultant
+  User <|-- Admin
+}
+
+package "model.core" {
+  class AvailabilitySlot {
+    - slotId : String
+    - consultant : Consultant
+    - startDateTime : LocalDateTime
+    - endDateTime : LocalDateTime
+    - available : boolean
+  }
+
+  class ConsultingService {
+    - serviceId : String
+    - serviceName : String
+    - description : String
+    - durationMinutes : int
+    - basePrice : double
+  }
+
+  class ConsultantServiceOffering {
+    - offeringId : String
+    - consultant : Consultant
+    - consultingService : ConsultingService
+    - active : boolean
+    - customPrice : double
+  }
+
+  class Booking {
+    - bookingId : String
+    - client : Client
+    - offering : ConsultantServiceOffering
+    - slot : AvailabilitySlot
+    - currentState : BookingState
+    - createdAt : LocalDateTime
+    + request() : void
+    + confirm() : void
+    + markPendingPayment() : void
+    + pay() : void
+    + reject() : void
+    + cancel() : void
+    + complete() : void
+    + belongsToClient(clientId : String) : boolean
+    + setCurrentState(state : BookingState) : void
+  }
+}
+
+package state {
+  interface BookingState {
+    + request(booking : Booking) : void
+    + confirm(booking : Booking) : void
+    + markPendingPayment(booking : Booking) : void
+    + pay(booking : Booking) : void
+    + reject(booking : Booking) : void
+    + cancel(booking : Booking) : void
+    + complete(booking : Booking) : void
+    + getName() : String
+  }
+
+  abstract class AbstractBookingState implements BookingState
+
+  class RequestedState extends AbstractBookingState
+  class ConfirmedState extends AbstractBookingState
+  class PendingPaymentState extends AbstractBookingState
+  class PaidState extends AbstractBookingState
+  class RejectedState extends AbstractBookingState
+  class CancelledState extends AbstractBookingState
+  class CompletedState extends AbstractBookingState
+}
+
+package "model.payment" {
+  class SavedPaymentMethod {
+    - savedMethodId : String
+    - client : Client
+    - methodType : PaymentMethodType
+    - displayLabel : String
+    - paymentDetails : String
+    - paymentDetailData : String
+    + getMaskedPaymentDetails() : String
+  }
+
+  class PaymentTransaction {
+    - paymentTransactionId : String
+    - booking : Booking
+    - client : Client
+    - paymentMethodType : PaymentMethodType
+    - transactionType : PaymentTransactionType
+    - status : PaymentTransactionStatus
+    - amount : double
+    - paymentDetails : String
+    - paymentMetadata : String
+    - createdAt : LocalDateTime
+    + setStatus(status : PaymentTransactionStatus) : void
+  }
+}
+
+package payment {
+  interface PaymentMethodStrategy {
+    + validatePaymentDetails(paymentDetails : String, paymentMetadata : String) : void
+    + processPayment(amount : double, paymentDetails : String, paymentMetadata : String) : boolean
+  }
+
+  class CreditCardPaymentStrategy implements PaymentMethodStrategy
+  class DebitCardPaymentStrategy implements PaymentMethodStrategy
+  class PayPalPaymentStrategy implements PaymentMethodStrategy
+  class BankTransferPaymentStrategy implements PaymentMethodStrategy
+
+  class PaymentStrategyFactory {
+    + createStrategy(paymentMethodType : PaymentMethodType) : PaymentMethodStrategy
+  }
+}
+
+package "model.notification" {
+  abstract class DomainEvent {
+    - eventId : String
+    - occurredAt : LocalDateTime
+    - message : String
+    + getEventType() : String
+  }
+
+  class BookingRequestedEvent extends DomainEvent
+  class BookingAcceptedEvent extends DomainEvent
+  class BookingRejectedEvent extends DomainEvent
+  class BookingCancelledEvent extends DomainEvent
+  class PaymentProcessedEvent extends DomainEvent
+  class ConsultantApprovalEvent extends DomainEvent
+}
+
+package observer {
+  interface Observer {
+    + update(event : DomainEvent) : void
+    + supports(event : DomainEvent) : boolean
+    + getObserverId() : String
+  }
+
+  class ClientObserver implements Observer {
+    - observerId : String
+    - name : String
+    + update(event : DomainEvent) : void
+    + supports(event : DomainEvent) : boolean
+  }
+
+  class ConsultantObserver implements Observer {
+    - observerId : String
+    - name : String
+    + update(event : DomainEvent) : void
+    + supports(event : DomainEvent) : boolean
+  }
+
+  class AdminObserver implements Observer {
+    - observerId : String
+    - name : String
+    + update(event : DomainEvent) : void
+    + supports(event : DomainEvent) : boolean
+  }
+
+  class EventPublisher {
+    - observers : List<Observer>
+    - eventSequence : int
+    + subscribe(observer : Observer) : void
+    + unsubscribe(observerId : String) : void
+    + publish(event : DomainEvent) : void
+    + nextEventId() : String
+  }
+}
+
+package "model.policy" {
+  class NotificationPolicy {
+    - notifyOnBookingRequested : boolean
+    - notifyOnBookingAccepted : boolean
+    - notifyOnBookingRejected : boolean
+    - notifyOnPaymentProcessed : boolean
+    - notifyOnBookingCancelled : boolean
+    - notifyOnConsultantApprovalDecision : boolean
+  }
+}
+
+package "service.impl" {
+  class DefaultBookingService {
+    - eventPublisher : EventPublisher
+    + requestBooking(clientId : String, offeringId : String, slotId : String) : Booking
+    + cancelBooking(clientId : String, bookingId : String) : Booking
+  }
+
+  class DefaultConsultantService {
+    - eventPublisher : EventPublisher
+    + acceptBooking(consultantId : String, bookingId : String) : Booking
+    + rejectBooking(consultantId : String, bookingId : String) : Booking
+    + completeBooking(consultantId : String, bookingId : String) : Booking
+  }
+
+  class DefaultPaymentService {
+    - paymentStrategyFactory : PaymentStrategyFactory
+    - eventPublisher : EventPublisher
+    + addSavedPaymentMethod(clientId : String, paymentMethodType : PaymentMethodType, displayLabel : String, paymentDetails : String, paymentMetadata : String) : SavedPaymentMethod
+    + updateSavedPaymentMethod(clientId : String, savedMethodId : String, paymentMethodType : PaymentMethodType, displayLabel : String, paymentDetails : String, paymentMetadata : String) : SavedPaymentMethod
+    + processPayment(clientId : String, bookingId : String, paymentMethodType : PaymentMethodType, paymentDetails : String, paymentMetadata : String) : PaymentTransaction
+    + processPaymentWithSavedMethod(clientId : String, bookingId : String, savedMethodId : String) : PaymentTransaction
+  }
+
+  class DefaultAdminService {
+    - eventPublisher : EventPublisher
+    + approveConsultant(adminId : String, consultantId : String) : Consultant
+    + rejectConsultant(adminId : String, consultantId : String) : Consultant
+  }
+}
+
+package util {
+  enum ConsultantApprovalStatus
+  enum PaymentMethodType
+  enum PaymentTransactionStatus
+  enum PaymentTransactionType
+}
+
+' Domain Relationships
+
+AvailabilitySlot --> Consultant
+ConsultantServiceOffering --> Consultant
+ConsultantServiceOffering --> ConsultingService
+
+Booking --> Client
+Booking --> ConsultantServiceOffering
+Booking --> AvailabilitySlot
+Booking --> BookingState
+
+SavedPaymentMethod --> Client
+SavedPaymentMethod --> PaymentMethodType
+
+PaymentTransaction --> Booking
+PaymentTransaction --> Client
+PaymentTransaction --> PaymentMethodType
+PaymentTransaction --> PaymentTransactionType
+PaymentTransaction --> PaymentTransactionStatus
+
+Consultant --> ConsultantApprovalStatus
+
+
+' State pattern
+
+AbstractBookingState --> Booking
+RequestedState --> ConfirmedState
+RequestedState --> RejectedState
+RequestedState --> CancelledState
+ConfirmedState --> PendingPaymentState
+ConfirmedState --> CancelledState
+PendingPaymentState --> PaidState
+PendingPaymentState --> CancelledState
+PaidState --> CompletedState
+PaidState --> CancelledState
+
+
+' Strategy pattern: For payment factory & Selection
+
+PaymentStrategyFactory --> PaymentMethodStrategy
+CreditCardPaymentStrategy --> PaymentMethodType
+DebitCardPaymentStrategy --> PaymentMethodType
+PayPalPaymentStrategy --> PaymentMethodType
+BankTransferPaymentStrategy --> PaymentMethodType
+DefaultPaymentService --> PaymentStrategyFactory
+DefaultPaymentService --> PaymentMethodStrategy
+DefaultPaymentService --> SavedPaymentMethod
+DefaultPaymentService --> PaymentTransaction
+
+
+' Observer pattern
+
+EventPublisher o-- Observer
+EventPublisher --> DomainEvent : publishes
+Observer --> DomainEvent : subscribes/receives
+
+DomainEvent <|-- BookingRequestedEvent
+DomainEvent <|-- BookingAcceptedEvent
+DomainEvent <|-- BookingRejectedEvent
+DomainEvent <|-- BookingCancelledEvent
+DomainEvent <|-- PaymentProcessedEvent
+DomainEvent <|-- ConsultantApprovalEvent
+
+DefaultBookingService --> EventPublisher
+DefaultConsultantService --> EventPublisher
+DefaultPaymentService --> EventPublisher
+DefaultAdminService --> EventPublisher
+
+DefaultBookingService --> BookingRequestedEvent
+DefaultBookingService --> BookingCancelledEvent
+DefaultConsultantService --> BookingAcceptedEvent
+DefaultConsultantService --> BookingRejectedEvent
+DefaultPaymentService --> PaymentProcessedEvent
+DefaultAdminService --> ConsultantApprovalEvent
+
+
+' Policies
+
+DefaultBookingService --> NotificationPolicy
+DefaultConsultantService --> NotificationPolicy
+DefaultPaymentService --> NotificationPolicy
+DefaultAdminService --> NotificationPolicy
+
+@enduml

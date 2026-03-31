@@ -1,0 +1,23 @@
+package state;
+
+import model.core.Booking;
+import util.BusinessRuleViolationException;
+
+public abstract class AbstractBookingState implements BookingState {
+    @Override
+    public void confirm(Booking booking) { throw invalidTransition("confirm"); }
+    @Override
+    public void moveToPendingPayment(Booking booking) { throw invalidTransition("move to pending payment"); }
+    @Override
+    public void markPaid(Booking booking) { throw invalidTransition("mark paid"); }
+    @Override
+    public void reject(Booking booking) { throw invalidTransition("reject"); }
+    @Override
+    public void cancel(Booking booking) { throw invalidTransition("cancel"); }
+    @Override
+    public void complete(Booking booking) { throw invalidTransition("complete"); }
+
+    protected BusinessRuleViolationException invalidTransition(String action) {
+        return new BusinessRuleViolationException("Cannot " + action + " when booking is in state " + getName() + ".");
+    }
+}
