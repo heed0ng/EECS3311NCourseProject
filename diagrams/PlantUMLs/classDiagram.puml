@@ -1,0 +1,762 @@
+@startuml
+hide circle
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam shadowing false
+skinparam wrapWidth 220
+skinparam maxMessageSize 220
+
+
+package "util" {
+  enum ConsultantApprovalStatus {
+    PENDING
+    APPROVED
+    REJECTED
+  }
+
+  enum PaymentMethodType {
+    CREDIT_CARD
+    DEBIT_CARD
+    PAYPAL
+    BANK_TRANSFER
+    NONE_SELECTED
+  }
+
+  enum PaymentTransactionType {
+    PAYMENT
+    REFUND
+  }
+
+  enum PaymentTransactionStatus {
+    PENDING
+    SUCCESS
+    FAILED
+  }
+}
+
+package "model.user" {
+  abstract class User {
+    -userId: String
+    -name: String
+    -email: String
+    #User(userId: String, name: String, email: String)
+  }
+
+  class Client extends User {
+    +Client(userId: String, name: String, email: String)
+  }
+
+  class Consultant extends User{
+    -approvalStatus: ConsultantApprovalStatus
+    +Consultant(userId: String, name: String, email: String, approvalStatus: ConsultantApprovalStatus)
+    +isApproved(): boolean
+  }
+
+  class Admin extends User {
+    +Admin(userId: String, name: String, email: String)
+  }
+}
+
+package "model.core" {
+  class ConsultingService {
+    -serviceId: String
+    -name: String
+    -description: String
+    -durationMinutes: int
+    -basePrice: double
+    -active: boolean
+    +ConsultingService(serviceId: String, name: String, description: String, durationMinutes: int, basePrice: double, active: boolean)
+  }
+
+  class ConsultantServiceOffering {
+    -offeringId: String
+    -consultant: Consultant
+    -consultingService: ConsultingService
+    -customPrice: Double
+    -active: boolean
+    +ConsultantServiceOffering(offeringId: String, consultant: Consultant, consultingService: ConsultingService, customPrice: Double, active: boolean)
+    +getEffectivePrice(): double
+    +getDurationMinutes(): int
+  }
+
+  class AvailabilitySlot {
+    -slotId: String
+    -consultant: Consultant
+    -startDateTime: LocalDateTime
+    -endDateTime: LocalDateTime
+    -available: boolean
+    +AvailabilitySlot(slotId: String, consultant: Consultant, startDateTime: LocalDateTime, endDateTime: LocalDateTime, available: boolean)
+    +isOwnedBy(consultantId: String): boolean
+    +overlaps(start: LocalDateTime, end: LocalDateTime): boolean
+  }
+
+  class Booking {
+    -bookingId: String
+    -client: Client
+    -offering: ConsultantServiceOffering
+    -slot: AvailabilitySlot
+    -state: BookingState
+    -createdAt: LocalDateTime
+    -lastUpdatedAt: LocalDateTime
+    -agreedPrice: double
+    +Booking(bookingId: String, client: Client, offering: ConsultantServiceOffering, slot: AvailabilitySlot, initialState: BookingState, createdAt: LocalDateTime, lastUpdatedAt: LocalDateTime, agreedPrice: double)
+    +setState(state: BookingState): void
+    +touch(): void
+    +confirm(): void
+    +moveToPendingPayment(): void
+    +markPaid(): void
+    +reject(): void
+    +cancel(): void
+    +complete(): void
+    +belongsToClient(clientId: String): boolean
+    +belongsToConsultant(consultantId: String): boolean
+    +getStateName(): String
+  }
+}
+
+package "state" {
+  interface BookingState {
+    +confirm(booking: Booking): void
+    +moveToPendingPayment(booking: Booking): void
+    +markPaid(booking: Booking): void
+    +reject(booking: Booking): void
+    +cancel(booking: Booking): void
+    +complete(booking: Booking): void
+    +getName(): String
+  }
+
+  abstract class AbstractBookingState implements BookingState {
+    +confirm(booking: Booking): void
+    +moveToPendingPayment(booking: Booking): void
+    +markPaid(booking: Booking): void
+    +reject(booking: Booking): void
+    +cancel(booking: Booking): void
+    +complete(booking: Booking): void
+    #invalidTransition(action: String)
+  }
+
+  class RequestedState extends AbstractBookingState {
+    +confirm(booking: Booking): void
+    +reject(booking: Booking): void
+    +cancel(booking: Booking): void
+    +getName(): String
+  }
+
+  class ConfirmedState extends AbstractBookingState {
+    +moveToPendingPayment(booking: Booking): void
+    +cancel(booking: Booking): void
+    +getName(): String
+  }
+
+  class PendingPaymentState extends AbstractBookingState {
+    +markPaid(booking: Booking): void
+    +cancel(booking: Booking): void
+    +getName(): String
+  }
+
+  class PaidState extends AbstractBookingState {
+    +cancel(booking: Booking): void
+    +complete(booking: Booking): void
+    +getName(): String
+  }
+
+  class RejectedState extends AbstractBookingState {
+    +getName(): String
+  }
+
+  class CancelledState extends AbstractBookingState {
+    +getName(): String
+  }
+
+  class CompletedState extends AbstractBookingState {
+    +getName(): String
+  }
+}
+
+package "model.payment" {
+  class SavedPaymentMethod {
+    -savedMethodId: String
+    -client: Client
+    -methodType: PaymentMethodType
+    -displayLabel: String
+    -paymentDetails: String
+    -paymentDetailData: String
+    +SavedPaymentMethod(savedMethodId: String, client: Client, methodType: PaymentMethodType, displayLabel: String, paymentDetails: String, paymentDetailData: String)
+  }
+
+  class PaymentTransaction {
+    -transactionId: String
+    -booking: Booking
+    -client: Client
+    -transactionType: PaymentTransactionType
+    -status: PaymentTransactionStatus
+    -methodType: PaymentMethodType
+    -amount: double
+    -createdAt: LocalDateTime
+    +PaymentTransaction(transactionId: String, booking: Booking, client: Client, transactionType: PaymentTransactionType, status: PaymentTransactionStatus, methodType: PaymentMethodType, amount: double, createdAt: LocalDateTime)
+    +isRefund(): boolean
+  }
+}
+
+package "model.policy" {
+  class CancellationPolicy {
+    -policyId: String
+    -cancellationDeadlineHours: int
+    +CancellationPolicy(policyId: String, cancellationDeadlineHours: int)
+    +canCancel(booking: Booking, now: LocalDateTime): boolean
+  }
+
+  class RefundPolicy {
+    -policyId: String
+    -refundPercentBeforeDeadline: double
+    -refundPercentAfterDeadline: double
+    +RefundPolicy(policyId: String, refundPercentBeforeDeadline: double, refundPercentAfterDeadline: double)
+    +calculateRefund(booking: Booking, now: LocalDateTime, cancellationPolicy: CancellationPolicy): double
+  }
+
+  class CustomPricingPolicy {
+    -policyId: String
+    -allowConsultantCustomPrice: boolean
+    +CustomPricingPolicy(policyId: String, allowConsultantCustomPrice: boolean)
+  }
+
+  class NotificationPolicy {
+    -policyId: String
+    -notifyOnBookingRequested: boolean
+    -notifyOnBookingAccepted: boolean
+    -notifyOnBookingRejected: boolean
+    -notifyOnPaymentProcessed: boolean
+    -notifyOnBookingCancelled: boolean
+    -notifyOnConsultantApprovalDecision: boolean
+    +NotificationPolicy(policyId: String, notifyOnBookingRequested: boolean, notifyOnBookingAccepted: boolean, notifyOnBookingRejected: boolean, notifyOnPaymentProcessed: boolean, notifyOnBookingCancelled: boolean, notifyOnConsultantApprovalDecision: boolean)
+  }
+}
+
+package "model.notification" {
+  abstract class DomainEvent {
+    -eventId: String
+    -occurredAt: LocalDateTime
+    -eventType: String
+    -message: String
+    +DomainEvent(eventId: String, occurredAt: LocalDateTime, eventType: String, message: String)
+  }
+
+  class BookingRequestedEvent extends DomainEvent {
+    +BookingRequestedEvent(eventId: String, occurredAt: LocalDateTime, message: String)
+  }
+  class BookingAcceptedEvent extends DomainEvent {
+    +BookingAcceptedEvent(eventId: String, occurredAt: LocalDateTime, message: String)
+  }
+  class BookingRejectedEvent extends DomainEvent {
+    +BookingRejectedEvent(eventId: String, occurredAt: LocalDateTime, message: String)
+  }
+  class BookingCancelledEvent extends DomainEvent {
+    +BookingCancelledEvent(eventId: String, occurredAt: LocalDateTime, message: String)
+  }
+  class PaymentProcessedEvent extends DomainEvent {
+    +PaymentProcessedEvent(eventId: String, occurredAt: LocalDateTime, message: String)
+  }
+  class ConsultantApprovalEvent extends DomainEvent {
+    +ConsultantApprovalEvent(eventId: String, occurredAt: LocalDateTime, message: String)
+  }
+}
+
+package "observer" {
+  interface Observer {
+    +update(event: DomainEvent): void
+    +supports(event: DomainEvent): boolean
+    +getObserverId(): String
+  }
+
+  class EventPublisher {
+    -observers: List<Observer>
+    -nextEventIdNumber: int = 1
+    +EventPublisher()
+    +subscribe(observer: Observer): void
+    +unsubscribe(observer: Observer): void
+    +publish(event: DomainEvent): void
+    +nextEventId(): String
+  }
+
+  class AdminObserver implements Observer {
+    -observerId: String
+    -name: String
+    +AdminObserver(observerId: String, name: String)
+    +update(event: DomainEvent): void
+    +supports(event: DomainEvent): boolean
+    +getObserverId(): String
+  }
+
+  class ClientObserver implements Observer {
+    -observerId: String
+    -name: String
+    +ClientObserver(observerId: String, name: String)
+    +update(event: DomainEvent): void
+    +supports(event: DomainEvent): boolean
+    +getObserverId(): String
+  }
+
+  class ConsultantObserver implements Observer {
+    -observerId: String
+    -name: String
+    +ConsultantObserver(observerId: String, name: String)
+    +update(event: DomainEvent): void
+    +supports(event: DomainEvent): boolean
+    +getObserverId(): String
+  }
+}
+
+package "paymentStrategy" {
+  interface PaymentMethodStrategy {
+    +getMethodType(): PaymentMethodType
+    +validate(savedPaymentMethod: SavedPaymentMethod): void
+    +process(booking: Booking, savedPaymentMethod: SavedPaymentMethod): String
+  }
+
+  class CreditCardPaymentStrategy implements PaymentMethodStrategy {
+    +getMethodType(): PaymentMethodType
+    +validate(method: SavedPaymentMethod): void
+    +process(booking: Booking, method: SavedPaymentMethod): String
+  }
+
+  class DebitCardPaymentStrategy implements PaymentMethodStrategy {
+    +getMethodType(): PaymentMethodType
+    +validate(method: SavedPaymentMethod): void
+    +process(booking: Booking, method: SavedPaymentMethod): String
+  }
+
+  class PayPalPaymentStrategy implements PaymentMethodStrategy {
+    +getMethodType(): PaymentMethodType
+    +validate(method: SavedPaymentMethod): void
+    +process(booking: Booking, method: SavedPaymentMethod): String
+  }
+
+  class BankTransferPaymentStrategy implements PaymentMethodStrategy {
+    +getMethodType(): PaymentMethodType
+    +validate(method: SavedPaymentMethod): void
+    +process(booking: Booking, method: SavedPaymentMethod): String
+  }
+
+  class PaymentStrategyFactory {
+    +create(paymentMethodType: PaymentMethodType): PaymentMethodStrategy
+  }
+}
+
+package "repository" {
+  interface AdminRepository {
+    +findById(adminId: String): Optional<Admin>
+    +findAll(): List<Admin>
+    +save(admin: Admin): void
+  }
+
+  interface ClientRepository {
+    +findById(clientId: String): Optional<Client>
+    +findAll(): List<Client>
+    +save(client: Client): void
+  }
+
+  interface ConsultantRepository {
+    +findById(consultantId: String): Optional<Consultant>
+    +findAllApproved(): List<Consultant>
+    +findPendingApproval(): List<Consultant>
+    +findAll(): List<Consultant>
+    +save(consultant: Consultant): void
+  }
+
+  interface ConsultingServiceRepository {
+    +findById(serviceId: String): Optional<ConsultingService>
+    +findAllActive(): List<ConsultingService>
+    +findAll(): List<ConsultingService>
+    +save(consultingService: ConsultingService): void
+  }
+
+  interface ConsultantServiceOfferingRepository {
+    +findById(offeringId: String): Optional<ConsultantServiceOffering>
+    +findAllActive(): List<ConsultantServiceOffering>
+    +findByConsultant(consultantId: String): List<ConsultantServiceOffering>
+    +save(offering: ConsultantServiceOffering): void
+  }
+
+  interface AvailabilitySlotRepository {
+    +findById(slotId: String): Optional<AvailabilitySlot>
+    +findAvailableByConsultant(consultantId: String): List<AvailabilitySlot>
+    +findByConsultant(consultantId: String): List<AvailabilitySlot>
+    +findAllAvailable(): List<AvailabilitySlot>
+    +save(slot: AvailabilitySlot): void
+  }
+
+  interface BookingRepository {
+    +findById(bookingId: String): Optional<Booking>
+    +findByClient(clientId: String): List<Booking>
+    +findByConsultant(consultantId: String): List<Booking>
+    +findPendingRequestsForConsultant(consultantId: String): List<Booking>
+    +findAll(): List<Booking>
+    +save(booking: Booking): void
+  }
+
+  interface SavedPaymentMethodRepository {
+    +findById(savedMethodId: String): Optional<SavedPaymentMethod>
+    +findByClient(clientId: String): List<SavedPaymentMethod>
+    +save(savedPaymentMethod: SavedPaymentMethod): void
+    +delete(savedMethodId: String): void
+  }
+
+  interface PaymentTransactionRepository {
+    +findByClient(clientId: String): List<PaymentTransaction>
+    +findByBooking(bookingId: String): List<PaymentTransaction>
+    +save(paymentTransaction: PaymentTransaction): void
+  }
+
+  interface PolicyRepository {
+    +getCancellationPolicy(): CancellationPolicy
+    +getRefundPolicy(): RefundPolicy
+    +getPricingPolicy(): CustomPricingPolicy
+    +getNotificationPolicy(): NotificationPolicy
+    +saveCancellationPolicy(policy: CancellationPolicy): void
+    +saveRefundPolicy(policy: RefundPolicy): void
+    +savePricingPolicy(policy: CustomPricingPolicy): void
+    +saveNotificationPolicy(policy: NotificationPolicy): void
+  }
+}
+
+package "repository.sqlite" {
+  class DatabaseManager {
+    -databaseUrl: String
+    +DatabaseManager(databaseFilePath: String)
+    +getConnection(): Connection
+  }
+
+  class SchemaInitializer {
+    -databaseManager: DatabaseManager
+    +SchemaInitializer(databaseManager: DatabaseManager)
+    +initialize(): void
+  }
+
+  class IdGenerator {
+    -NUMERIC_SUFFIX_PATTERN: Pattern {static}
+    -databaseManager: DatabaseManager
+    +IdGenerator(databaseManager: DatabaseManager)
+    +nextId(tableName: String, idColumnName: String, prefix: String): String
+  }
+
+  class SqliteAdminRepository {
+    -databaseManager: DatabaseManager
+    +SqliteAdminRepository(databaseManager: DatabaseManager)
+    +findById(adminId: String): Optional<Admin>
+    +findAll(): List<Admin>
+    +save(admin: Admin): void
+  }
+
+  class SqliteClientRepository {
+    -databaseManager: DatabaseManager
+    +SqliteClientRepository(databaseManager: DatabaseManager)
+    +findById(clientId: String): Optional<Client>
+    +findAll(): List<Client>
+    +save(client: Client): void
+  }
+
+  class SqliteConsultantRepository {
+    -databaseManager: DatabaseManager
+    +SqliteConsultantRepository(databaseManager: DatabaseManager)
+    +findById(consultantId: String): Optional<Consultant>
+    +findAllApproved(): List<Consultant>
+    +findPendingApproval(): List<Consultant>
+    +findAll(): List<Consultant>
+    +save(consultant: Consultant): void
+  }
+
+  class SqliteConsultingServiceRepository {
+    -databaseManager: DatabaseManager
+    +SqliteConsultingServiceRepository(databaseManager: DatabaseManager)
+    +findById(serviceId: String): Optional<ConsultingService>
+    +findAllActive(): List<ConsultingService>
+    +findAll(): List<ConsultingService>
+    +save(service: ConsultingService): void
+  }
+
+  class SqliteConsultantServiceOfferingRepository {
+    -databaseManager: DatabaseManager
+    +SqliteConsultantServiceOfferingRepository(databaseManager: DatabaseManager)
+    +findById(offeringId: String): Optional<ConsultantServiceOffering>
+    +findAllActive(): List<ConsultantServiceOffering>
+    +findByConsultant(consultantId: String): List<ConsultantServiceOffering>
+    +save(offering: ConsultantServiceOffering): void
+  }
+
+  class SqliteAvailabilitySlotRepository {
+    -databaseManager: DatabaseManager
+    +SqliteAvailabilitySlotRepository(databaseManager: DatabaseManager)
+    +findById(slotId: String): Optional<AvailabilitySlot>
+    +findAvailableByConsultant(consultantId: String): List<AvailabilitySlot>
+    +findByConsultant(consultantId: String): List<AvailabilitySlot>
+    +findAllAvailable(): List<AvailabilitySlot>
+    +save(slot: AvailabilitySlot): void
+  }
+
+  class SqliteBookingRepository {
+    -databaseManager: DatabaseManager
+    +SqliteBookingRepository(databaseManager: DatabaseManager)
+    +findById(bookingId: String): Optional<Booking>
+    +findByClient(clientId: String): List<Booking>
+    +findByConsultant(consultantId: String): List<Booking>
+    +findPendingRequestsForConsultant(consultantId: String): List<Booking>
+    +findAll(): List<Booking>
+    +save(booking: Booking): void
+  }
+
+  class SqliteSavedPaymentMethodRepository {
+    -databaseManager: DatabaseManager
+    -clientRepository: SqliteClientRepository
+    +SqliteSavedPaymentMethodRepository(databaseManager: DatabaseManager, clientRepository: SqliteClientRepository)
+    +findById(savedMethodId: String): Optional<SavedPaymentMethod>
+    +findByClient(clientId: String): List<SavedPaymentMethod>
+    +save(method: SavedPaymentMethod): void
+    +delete(savedMethodId: String): void
+  }
+
+  class SqlitePaymentTransactionRepository {
+    -databaseManager: DatabaseManager
+    -bookingRepository: SqliteBookingRepository
+    -clientRepository: SqliteClientRepository
+    +SqlitePaymentTransactionRepository(databaseManager: DatabaseManager, bookingRepository: SqliteBookingRepository, clientRepository: SqliteClientRepository)
+    +findByClient(clientId: String): List<PaymentTransaction>
+    +findByBooking(bookingId: String): List<PaymentTransaction>
+    +save(paymentTransaction: PaymentTransaction): void
+  }
+
+  class SqlitePolicyRepository {
+    -databaseManager: DatabaseManager
+    +SqlitePolicyRepository(databaseManager: DatabaseManager)
+    +getCancellationPolicy(): CancellationPolicy
+    +getRefundPolicy(): RefundPolicy
+    +getPricingPolicy(): CustomPricingPolicy
+    +getNotificationPolicy(): NotificationPolicy
+    +saveCancellationPolicy(policy: CancellationPolicy): void
+    +saveRefundPolicy(policy: RefundPolicy): void
+    +savePricingPolicy(policy: CustomPricingPolicy): void
+    +saveNotificationPolicy(policy: NotificationPolicy): void
+  }
+}
+
+package "service" {
+  interface AdminService {
+    +getPendingConsultants(): List<Consultant>
+    +approveConsultant(adminId: String, consultantId: String): Consultant
+    +rejectConsultant(adminId: String, consultantId: String): Consultant
+    +updateCancellationPolicy(adminId: String, cancellationDeadlineHours: int): CancellationPolicy
+    +updateRefundPolicy(adminId: String, refundPercentBeforeDeadline: double, refundPercentAfterDeadline: double): RefundPolicy
+    +updatePricingPolicy(adminId: String, allowConsultantCustomPrice: boolean): CustomPricingPolicy
+    +updateNotificationPolicy(adminId: String, notifyOnBookingRequested: boolean, notifyOnBookingAccepted: boolean, notifyOnBookingRejected: boolean, notifyOnPaymentProcessed: boolean, notifyOnBookingCancelled: boolean, notifyOnConsultantApprovalDecision: boolean): NotificationPolicy
+    +getCancellationPolicy(): CancellationPolicy
+    +getRefundPolicy(): RefundPolicy
+    +getPricingPolicy(): CustomPricingPolicy
+    +getNotificationPolicy(): NotificationPolicy
+  }
+
+  interface BookingService {
+    +browseAvailableOfferings(): List<ConsultantServiceOffering>
+    +requestBooking(clientId: String, offeringId: String, slotId: String): Booking
+    +cancelBooking(clientId: String, bookingId: String): Booking
+    +getBookingHistory(clientId: String): List<Booking>
+    +getAllBookings(): List<Booking>
+    +getAllAvailableSlots(): List<AvailabilitySlot>
+    +getCancellationSummary(clientId: String, bookingId: String): String
+  }
+
+  interface ConsultantService {
+    +addAvailabilitySlot(consultantId: String, startDateTime: LocalDateTime, endDateTime: LocalDateTime): AvailabilitySlot
+    +addServiceOffering(consultantId: String, serviceId: String, customPrice: Double): ConsultantServiceOffering
+    +getAvailabilitySlots(consultantId: String): List<AvailabilitySlot>
+    +getPendingBookingRequests(consultantId: String): List<Booking>
+    +acceptBookingRequest(consultantId: String, bookingId: String): Booking
+    +rejectBookingRequest(consultantId: String, bookingId: String): Booking
+    +completeBooking(consultantId: String, bookingId: String): Booking
+  }
+
+  interface PaymentService {
+    +addSavedPaymentMethod(clientId: String, methodType: PaymentMethodType, displayLabel: String, paymentDetails: String, paymentDetailData: String): SavedPaymentMethod
+    +updateSavedPaymentMethod(clientId: String, savedMethodId: String, displayLabel: String, paymentDetails: String, paymentDetailData: String): SavedPaymentMethod
+    +removeSavedPaymentMethod(clientId: String, savedMethodId: String): void
+    +getSavedPaymentMethods(clientId: String): List<SavedPaymentMethod>
+    +processPayment(clientId: String, bookingId: String, savedMethodId: String): PaymentTransaction
+    +getPaymentHistory(clientId: String): List<PaymentTransaction>
+  }
+}
+
+package "service.impl" {
+  class DefaultAdminService {
+    -adminRepository: AdminRepository
+    -consultantRepository: ConsultantRepository
+    -policyRepository: PolicyRepository
+    -eventPublisher: EventPublisher
+    +DefaultAdminService(adminRepository: AdminRepository, consultantRepository: ConsultantRepository, policyRepository: PolicyRepository, eventPublisher: EventPublisher)
+    +getPendingConsultants(): List<Consultant>
+    +approveConsultant(adminId: String, consultantId: String): Consultant
+    +rejectConsultant(adminId: String, consultantId: String): Consultant
+    +updateCancellationPolicy(adminId: String, cancellationDeadlineHours: int): CancellationPolicy
+    +updateRefundPolicy(adminId: String, refundPercentBeforeDeadline: double, refundPercentAfterDeadline: double): RefundPolicy
+    +updatePricingPolicy(adminId: String, allowConsultantCustomPrice: boolean): CustomPricingPolicy
+    +updateNotificationPolicy(adminId: String, notifyOnBookingRequested: boolean, notifyOnBookingAccepted: boolean, notifyOnBookingRejected: boolean, notifyOnPaymentProcessed: boolean, notifyOnBookingCancelled: boolean, notifyOnConsultantApprovalDecision: boolean): NotificationPolicy
+    +getCancellationPolicy(): CancellationPolicy
+    +getRefundPolicy(): RefundPolicy
+    +getPricingPolicy(): CustomPricingPolicy
+    +getNotificationPolicy(): NotificationPolicy
+  }
+
+  class DefaultBookingService {
+    -idGenerator: IdGenerator
+    -clientRepository: ClientRepository
+    -offeringRepository: ConsultantServiceOfferingRepository
+    -availabilitySlotRepository: AvailabilitySlotRepository
+    -bookingRepository: BookingRepository
+    -paymentTransactionRepository: PaymentTransactionRepository
+    -policyRepository: PolicyRepository
+    -eventPublisher: EventPublisher
+    +DefaultBookingService(clientRepository: ClientRepository, offeringRepository: ConsultantServiceOfferingRepository, availabilitySlotRepository: AvailabilitySlotRepository, bookingRepository: BookingRepository, paymentTransactionRepository: PaymentTransactionRepository, policyRepository: PolicyRepository, eventPublisher: EventPublisher, idGenerator: IdGenerator)
+    +browseAvailableOfferings(): List<ConsultantServiceOffering>
+    +requestBooking(clientId: String, offeringId: String, slotId: String): Booking
+    +cancelBooking(clientId: String, bookingId: String): Booking
+    +getBookingHistory(clientId: String): List<Booking>
+    +getAllBookings(): List<Booking>
+    +getAllAvailableSlots(): List<AvailabilitySlot>
+    +getCancellationSummary(clientId: String, bookingId: String): String
+  }
+
+  class DefaultConsultantService {
+    -idGenerator: IdGenerator
+    -consultantRepository: ConsultantRepository
+    -consultingServiceRepository: ConsultingServiceRepository
+    -offeringRepository: ConsultantServiceOfferingRepository
+    -slotRepository: AvailabilitySlotRepository
+    -bookingRepository: BookingRepository
+    -paymentTransactionRepository: PaymentTransactionRepository
+    -policyRepository: PolicyRepository
+    -eventPublisher: EventPublisher
+    +DefaultConsultantService(consultantRepository: ConsultantRepository, consultingServiceRepository: ConsultingServiceRepository, offeringRepository: ConsultantServiceOfferingRepository, slotRepository: AvailabilitySlotRepository, bookingRepository: BookingRepository, paymentTransactionRepository: PaymentTransactionRepository, policyRepository: PolicyRepository, eventPublisher: EventPublisher, idGenerator: IdGenerator)
+    +addAvailabilitySlot(consultantId: String, startDateTime: LocalDateTime, endDateTime: LocalDateTime): AvailabilitySlot
+    +addServiceOffering(consultantId: String, serviceId: String, customPrice: Double): ConsultantServiceOffering
+    +getAvailabilitySlots(consultantId: String): List<AvailabilitySlot>
+    +getPendingBookingRequests(consultantId: String): List<Booking>
+    +acceptBookingRequest(consultantId: String, bookingId: String): Booking
+    +rejectBookingRequest(consultantId: String, bookingId: String): Booking
+    +completeBooking(consultantId: String, bookingId: String): Booking
+  }
+
+  class DefaultPaymentService {
+    -idGenerator: IdGenerator
+    -clientRepository: ClientRepository
+    -bookingRepository: BookingRepository
+    -savedPaymentMethodRepository: SavedPaymentMethodRepository
+    -paymentTransactionRepository: PaymentTransactionRepository
+    -policyRepository: PolicyRepository
+    -eventPublisher: EventPublisher
+    -paymentStrategyFactory: PaymentStrategyFactory
+    +DefaultPaymentService(clientRepository: ClientRepository, bookingRepository: BookingRepository, savedPaymentMethodRepository: SavedPaymentMethodRepository, paymentTransactionRepository: PaymentTransactionRepository, policyRepository: PolicyRepository, eventPublisher: EventPublisher, paymentStrategyFactory: PaymentStrategyFactory, idGenerator: IdGenerator)
+    +addSavedPaymentMethod(clientId: String, methodType: PaymentMethodType, displayLabel: String, paymentDetails: String, paymentDetailData: String): SavedPaymentMethod
+    +updateSavedPaymentMethod(clientId: String, savedMethodId: String, displayLabel: String, paymentDetails: String, paymentDetailData: String): SavedPaymentMethod
+    +removeSavedPaymentMethod(clientId: String, savedMethodId: String): void
+    +getSavedPaymentMethods(clientId: String): List<SavedPaymentMethod>
+    +processPayment(clientId: String, bookingId: String, savedMethodId: String): PaymentTransaction
+    +getPaymentHistory(clientId: String): List<PaymentTransaction>
+  }
+}
+
+
+ConsultantServiceOffering "*" --> "1" Consultant
+ConsultantServiceOffering "*" --> "1" ConsultingService
+AvailabilitySlot "*" --> "1" Consultant
+Booking "*" --> "1" Client
+Booking "*" --> "1" ConsultantServiceOffering
+Booking "*" --> "1" AvailabilitySlot
+Booking --> BookingState
+SavedPaymentMethod "*" --> "1" Client
+SavedPaymentMethod --> PaymentMethodType
+PaymentTransaction "*" --> "1" Booking
+PaymentTransaction "*" --> "1" Client
+PaymentTransaction --> PaymentTransactionType
+PaymentTransaction --> PaymentTransactionStatus
+PaymentTransaction --> PaymentMethodType
+CancellationPolicy ..> Booking
+RefundPolicy ..> Booking
+RefundPolicy --> CancellationPolicy
+Consultant --> ConsultantApprovalStatus
+
+EventPublisher o--Observer
+Observer ..> DomainEvent
+EventPublisher ..> DomainEvent
+
+PaymentMethodStrategy ..> Booking
+PaymentMethodStrategy ..> SavedPaymentMethod
+PaymentMethodStrategy ..> PaymentMethodType
+PaymentStrategyFactory ..> PaymentMethodStrategy
+PaymentStrategyFactory ..> CreditCardPaymentStrategy
+PaymentStrategyFactory ..> DebitCardPaymentStrategy
+PaymentStrategyFactory ..> PayPalPaymentStrategy
+PaymentStrategyFactory ..> BankTransferPaymentStrategy
+
+SqliteAdminRepository ..|> AdminRepository
+SqliteClientRepository ..|> ClientRepository
+SqliteConsultantRepository ..|> ConsultantRepository
+SqliteConsultingServiceRepository ..|> ConsultingServiceRepository
+SqliteConsultantServiceOfferingRepository ..|> ConsultantServiceOfferingRepository
+SqliteAvailabilitySlotRepository ..|> AvailabilitySlotRepository
+SqliteBookingRepository ..|> BookingRepository
+SqliteSavedPaymentMethodRepository ..|> SavedPaymentMethodRepository
+SqlitePaymentTransactionRepository ..|> PaymentTransactionRepository
+SqlitePolicyRepository ..|> PolicyRepository
+
+SqliteAdminRepository --> DatabaseManager
+SqliteClientRepository --> DatabaseManager
+SqliteConsultantRepository --> DatabaseManager
+SqliteConsultingServiceRepository --> DatabaseManager
+SqliteConsultantServiceOfferingRepository --> DatabaseManager
+SqliteAvailabilitySlotRepository --> DatabaseManager
+SqliteBookingRepository --> DatabaseManager
+SqliteSavedPaymentMethodRepository --> DatabaseManager
+SqlitePaymentTransactionRepository --> DatabaseManager
+SqlitePolicyRepository --> DatabaseManager
+SchemaInitializer --> DatabaseManager
+IdGenerator --> DatabaseManager
+SqliteSavedPaymentMethodRepository --> SqliteClientRepository
+SqlitePaymentTransactionRepository --> SqliteBookingRepository
+SqlitePaymentTransactionRepository --> SqliteClientRepository
+
+DefaultAdminService ..|> AdminService
+DefaultBookingService ..|> BookingService
+DefaultConsultantService ..|> ConsultantService
+DefaultPaymentService ..|> PaymentService
+
+DefaultAdminService --> AdminRepository
+DefaultAdminService --> ConsultantRepository
+DefaultAdminService --> PolicyRepository
+DefaultAdminService --> EventPublisher
+
+DefaultBookingService --> ClientRepository
+DefaultBookingService --> ConsultantServiceOfferingRepository
+DefaultBookingService --> AvailabilitySlotRepository
+DefaultBookingService --> BookingRepository
+DefaultBookingService --> PaymentTransactionRepository
+DefaultBookingService --> PolicyRepository
+DefaultBookingService --> EventPublisher
+DefaultBookingService --> IdGenerator
+
+DefaultConsultantService --> ConsultantRepository
+DefaultConsultantService --> ConsultingServiceRepository
+DefaultConsultantService --> ConsultantServiceOfferingRepository
+DefaultConsultantService --> AvailabilitySlotRepository
+DefaultConsultantService --> BookingRepository
+DefaultConsultantService --> PaymentTransactionRepository
+DefaultConsultantService --> PolicyRepository
+DefaultConsultantService --> EventPublisher
+DefaultConsultantService --> IdGenerator
+
+DefaultPaymentService --> ClientRepository
+DefaultPaymentService --> BookingRepository
+DefaultPaymentService --> SavedPaymentMethodRepository
+DefaultPaymentService --> PaymentTransactionRepository
+DefaultPaymentService --> PolicyRepository
+DefaultPaymentService --> EventPublisher
+DefaultPaymentService --> PaymentStrategyFactory
+DefaultPaymentService --> IdGenerator
+
+@enduml
