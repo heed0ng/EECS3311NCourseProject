@@ -11,7 +11,7 @@ import model.notification.PaymentProcessedEvent;
 import model.payment.PaymentTransaction;
 import model.payment.SavedPaymentMethod;
 import observer.EventPublisher;
-import payment.PaymentStrategyFactory;
+import paymentStrategy.PaymentStrategyFactory;
 import repository.BookingRepository;
 import repository.ClientRepository;
 import repository.PaymentTransactionRepository;
@@ -58,7 +58,7 @@ public class DefaultPaymentService implements PaymentService {
         
         String savedMethodId = this.idGenerator.nextId("saved_payment_methods", "saved_method_id", "paymentmethod");
         SavedPaymentMethod method = new SavedPaymentMethod(savedMethodId, client, methodType, displayLabel, paymentDetails, paymentDetailData);
-        savedPaymentMethodRepository.save(method);
+        this.savedPaymentMethodRepository.save(method);
         return method;
     }
 
@@ -72,7 +72,7 @@ public class DefaultPaymentService implements PaymentService {
         method.setPaymentDetails(requireNonBlank(paymentDetails, "Payment details are required."));
         method.setPaymentDetailData(paymentDetailData == null ? "" : paymentDetailData.trim());
 
-        savedPaymentMethodRepository.save(method);
+        this.savedPaymentMethodRepository.save(method);
         return method;
     }
 
@@ -80,12 +80,12 @@ public class DefaultPaymentService implements PaymentService {
     public void removeSavedPaymentMethod(String clientId, String savedMethodId) {
         SavedPaymentMethod method = savedPaymentMethodRepository.findById(savedMethodId).orElseThrow(() -> new EntityNotFoundException("Saved payment method not found."));
         if (!method.getClient().getUserId().equals(clientId)) throw new BusinessRuleViolationException("Payment method does not belong to client.");
-        savedPaymentMethodRepository.delete(savedMethodId);
+        this.savedPaymentMethodRepository.delete(savedMethodId);
     }
 
     @Override
     public List<SavedPaymentMethod> getSavedPaymentMethods(String clientId) {
-        return savedPaymentMethodRepository.findByClient(clientId);
+        return this.savedPaymentMethodRepository.findByClient(clientId);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class DefaultPaymentService implements PaymentService {
         var booking = bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException("Booking not found."));
         if (!booking.belongsToClient(clientId)) throw new BusinessRuleViolationException("Booking does not belong to client.");
         if (!"Pending Payment".equals(booking.getStateName())) throw new BusinessRuleViolationException("Booking is not pending payment.");
-        SavedPaymentMethod method = savedPaymentMethodRepository.findById(savedMethodId).orElseThrow(() -> new EntityNotFoundException("Saved payment method not found."));
+        SavedPaymentMethod method = this.savedPaymentMethodRepository.findById(savedMethodId).orElseThrow(() -> new EntityNotFoundException("Saved payment method not found."));
         if (!method.getClient().getUserId().equals(clientId)) throw new BusinessRuleViolationException("Payment method does not belong to client.");
         var strategy = paymentStrategyFactory.create(method.getMethodType());
         strategy.validate(method);
@@ -106,7 +106,7 @@ public class DefaultPaymentService implements PaymentService {
         }
         
         booking.markPaid();
-        bookingRepository.save(booking);
+        this.bookingRepository.save(booking);
         
         String transactionId = idGenerator.nextId("payment_transactions", "transaction_id", "transaction");
         PaymentTransaction transaction = new PaymentTransaction(transactionId, booking, booking.getClient(), PaymentTransactionType.PAYMENT, PaymentTransactionStatus.SUCCESS, method.getMethodType(), booking.getAgreedPrice(), LocalDateTime.now());
@@ -123,17 +123,14 @@ public class DefaultPaymentService implements PaymentService {
         return paymentTransactionRepository.findByClient(clientId);
     }
     
-    private void validatePaymentInput(PaymentMethodType methodType,
-            String paymentDetails,
-            String paymentDetailData) {
-
-        String details = requireNonBlank(paymentDetails, "Payment details are required.");
+    private void validatePaymentInput(PaymentMethodType methodType, String paymentDetails, String paymentDetailData) {
+        String details = this.requireNonBlank(paymentDetails, "Payment details are required.");
         String metadata = paymentDetailData == null ? "" : paymentDetailData.trim();
 
         switch (methodType) {
             case CREDIT_CARD:
             case DEBIT_CARD: {
-                String cardNumber = digitsOnly(details);
+                String cardNumber = this.digitsOnly(details);
                 if (!cardNumber.matches("\\d{16}")) {
                     throw new BusinessRuleViolationException(methodType.name() + " number must contain exactly 16 digits.");
                 }

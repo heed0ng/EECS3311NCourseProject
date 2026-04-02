@@ -1,8 +1,5 @@
 package ui;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -12,12 +9,12 @@ import model.core.*;
 import model.payment.*;
 import model.user.*;
 import observer.*;
-import payment.PaymentStrategyFactory;
+import paymentStrategy.PaymentStrategyFactory;
 import repository.*;
 import repository.sqlite.*;
+import util.*;
 import service.*;
 import service.impl.*;
-import util.*;
 
 public class TerminalUI {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -38,11 +35,14 @@ public class TerminalUI {
     private final ConsultantService consultantService;
     private final PaymentService paymentService;
     private final AdminService adminService;
+    private final AdminRepository adminRepository;
 
     public TerminalUI() {
-        this.databaseManager = new DatabaseManager("booking_platform_phase1.db");
+        String databaseFilePath = System.getProperty("user.dir") + "/booking_platform_phase1.db";
+        this.databaseManager = new DatabaseManager(databaseFilePath);
         new SchemaInitializer(databaseManager).initialize();
         this.eventPublisher = new EventPublisher();
+        SqliteAdminRepository sqliteAdminRepository = new SqliteAdminRepository(databaseManager);
         SqliteClientRepository sqliteClientRepository = new SqliteClientRepository(databaseManager);
         SqliteConsultantRepository sqliteConsultantRepository = new SqliteConsultantRepository(databaseManager);
         SqliteConsultingServiceRepository sqliteConsultingServiceRepository = new SqliteConsultingServiceRepository(databaseManager);
@@ -63,11 +63,12 @@ public class TerminalUI {
         this.savedPaymentMethodRepository = sqliteSavedPaymentMethodRepository;
         this.paymentTransactionRepository = sqlitePaymentTransactionRepository;
         this.policyRepository = sqlitePolicyRepository;
+        this.adminRepository = sqliteAdminRepository;
         
         this.bookingService = new DefaultBookingService(clientRepository, offeringRepository, slotRepository, bookingRepository, paymentTransactionRepository, policyRepository, eventPublisher, idGenerator);
         this.consultantService = new DefaultConsultantService(consultantRepository, consultingServiceRepository, offeringRepository, slotRepository, bookingRepository, policyRepository, eventPublisher, idGenerator);
         this.paymentService = new DefaultPaymentService(clientRepository, bookingRepository, savedPaymentMethodRepository, paymentTransactionRepository, policyRepository, eventPublisher, new PaymentStrategyFactory(), idGenerator);
-        this.adminService = new DefaultAdminService(consultantRepository, policyRepository, eventPublisher);
+        this.adminService = new DefaultAdminService(adminRepository, consultantRepository, policyRepository, eventPublisher);
     }
     
     public static void main(String[] args) {
@@ -338,7 +339,8 @@ public class TerminalUI {
         consultantRepository.save(new Consultant("consultant-2", "Dr. Doom Consultant", "doom@example.com", ConsultantApprovalStatus.PENDING));
         consultingServiceRepository.save(new ConsultingService("service-1", "Software Design Consulting", "UML, patterns, architecture review.", 60, 120.0, true));
         consultingServiceRepository.save(new ConsultingService("service-2", "Career Coaching", "Interview and resume consultation.", 45, 90.0, true));
-        
+        consultingServiceRepository.save(new ConsultingService("service-3", "Medical Checkup", "Basic Medical Examination for further check", 40, 300.0, true));
+        consultingServiceRepository.save(new ConsultingService("service-4", "Time Management Advise", "Weekly/mothly/yearly time management strategies setup", 55, 50.0, true));
         offeringRepository.save(new ConsultantServiceOffering("offering-1", consultantRepository.findById("consultant-1").orElseThrow(), consultingServiceRepository.findById("service-1").orElseThrow(), 140.0, true));
         offeringRepository.save(new ConsultantServiceOffering("offering-2", consultantRepository.findById("consultant-1").orElseThrow(), consultingServiceRepository.findById("service-2").orElseThrow(), null, true));
         slotRepository.save(new AvailabilitySlot("slot-1", consultantRepository.findById("consultant-1").orElseThrow(), LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0), LocalDateTime.now().plusDays(1).withHour(11).withMinute(0).withSecond(0).withNano(0), true));
@@ -356,22 +358,10 @@ public class TerminalUI {
     }
 
     private void insertAdminIfMissing(String adminId, String name, String email) {
-        String countSql = "SELECT COUNT(*) FROM admins WHERE user_id = ?";
-        String insertSql = "INSERT INTO admins(user_id, name, email) VALUES(?, ?, ?)";
-        try (Connection connection = databaseManager.getConnection(); PreparedStatement countStmt = connection.prepareStatement(countSql)) {
-            countStmt.setString(1, adminId);
-            try (ResultSet rs = countStmt.executeQuery()) {
-                if (rs.next() && rs.getInt(1) > 0) return;
-            }
-            try (PreparedStatement insertStmt = connection.prepareStatement(insertSql)) {
-                insertStmt.setString(1, adminId);
-                insertStmt.setString(2, name);
-                insertStmt.setString(3, email);
-                insertStmt.executeUpdate();
-            }
-        } catch (Exception exception) {
-            throw new RuntimeException("Failed to seed admin.", exception);
+        if (adminRepository.findById(adminId).isPresent()) {
+            return;
         }
+        adminRepository.save(new Admin(adminId, name, email));
     }
 
     private void printDemoIds() {

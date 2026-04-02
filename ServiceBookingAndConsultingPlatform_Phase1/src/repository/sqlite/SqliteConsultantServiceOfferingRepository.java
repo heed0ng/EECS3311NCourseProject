@@ -37,13 +37,13 @@ public class SqliteConsultantServiceOfferingRepository implements ConsultantServ
     @Override
     public List<ConsultantServiceOffering> findAllActive() {
         String sql = baseSql() + " WHERE o.active = 1 AND c.approval_status = 'APPROVED' ORDER BY s.name";
-        return findMany(sql, null);
+        return this.findMany(sql, null);
     }
 
     @Override
     public List<ConsultantServiceOffering> findByConsultant(String consultantId) {
         String sql = baseSql() + " WHERE o.consultant_id = ? ORDER BY s.name";
-        return findMany(sql, consultantId);
+        return this.findMany(sql, consultantId);
     }
 
     @Override

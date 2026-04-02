@@ -1,13 +1,11 @@
-package payment;
+package paymentStrategy;
 
 import util.BusinessRuleViolationException;
 import util.PaymentMethodType;
 
 public class PaymentStrategyFactory {
     public PaymentMethodStrategy create(PaymentMethodType paymentMethodType) {
-        if (paymentMethodType == null) {
-            throw new BusinessRuleViolationException("Payment method type is required.");
-        }
+        if (paymentMethodType == null) throw new BusinessRuleViolationException("Payment method type is required.");
         switch (paymentMethodType) {
             case CREDIT_CARD: return new CreditCardPaymentStrategy();
             case DEBIT_CARD: return new DebitCardPaymentStrategy();

@@ -26,7 +26,7 @@ package "model.payment" {
 package "model.policy" {
   class CancellationPolicy
   class NotificationPolicy
-  class PricingPolicy
+  class CustomPricingPolicy
   class RefundPolicy
 }
 
@@ -52,7 +52,7 @@ package state {
   class CompletedState extends AbstractBookingState
 }
 
-package payment {
+package paymentStrategy {
   interface PaymentMethodStrategy
   class CreditCardPaymentStrategy implements PaymentMethodStrategy
   class DebitCardPaymentStrategy implements PaymentMethodStrategy
@@ -164,7 +164,7 @@ Observer --> DomainEvent : subscribes/receives
 ' Service dependencies
 AdminService --> CancellationPolicy
 AdminService --> NotificationPolicy
-AdminService --> PricingPolicy
+AdminService --> CustomPricingPolicy
 AdminService --> RefundPolicy
 DefaultAdminService --> ConsultantRepository
 DefaultAdminService --> PolicyRepository

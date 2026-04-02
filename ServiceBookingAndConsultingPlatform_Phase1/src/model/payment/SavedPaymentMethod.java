@@ -11,8 +11,8 @@ public class SavedPaymentMethod {
     private String paymentDetails;
     private String paymentDetailData;
 
-    public SavedPaymentMethod(String savedMethodId, Client client, PaymentMethodType methodType,
-            String displayLabel, String paymentDetails, String paymentDetailData) {
+    public SavedPaymentMethod(String savedMethodId, Client client, PaymentMethodType methodType, String displayLabel, 
+    		String paymentDetails, String paymentDetailData) {
         this.savedMethodId = savedMethodId;
         this.client = client;
         this.methodType = methodType;

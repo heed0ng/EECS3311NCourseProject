@@ -1,4 +1,4 @@
-package payment;
+package paymentStrategy;
 
 import model.core.Booking;
 import model.payment.SavedPaymentMethod;
@@ -12,10 +12,7 @@ public class PayPalPaymentStrategy implements PaymentMethodStrategy {
     @Override
     public void validate(SavedPaymentMethod method) {
         String email = method.getPaymentDetails() == null ? "" : method.getPaymentDetails().trim();
-
-        if (!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-            throw new BusinessRuleViolationException("PayPal email format is invalid.");
-        }
+        if (!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) throw new BusinessRuleViolationException("PayPal email format is invalid.");
     }
     
     @Override

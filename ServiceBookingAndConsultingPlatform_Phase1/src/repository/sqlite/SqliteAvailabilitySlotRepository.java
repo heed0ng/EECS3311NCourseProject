@@ -36,15 +36,15 @@ public class SqliteAvailabilitySlotRepository implements AvailabilitySlotReposit
 
     @Override
     public List<AvailabilitySlot> findAvailableByConsultant(String consultantId) {
-        return findMany(baseSql() + " WHERE a.consultant_id = ? AND a.available = 1 AND c.approval_status = 'APPROVED' ORDER BY a.start_datetime", consultantId);
+        return this.findMany(baseSql() + " WHERE a.consultant_id = ? AND a.available = 1 AND c.approval_status = 'APPROVED' ORDER BY a.start_datetime", consultantId);
     }
     @Override
     public List<AvailabilitySlot> findByConsultant(String consultantId) {
-        return findMany(baseSql() + " WHERE a.consultant_id = ? ORDER BY a.start_datetime", consultantId);
+        return this.findMany(baseSql() + " WHERE a.consultant_id = ? ORDER BY a.start_datetime", consultantId);
     }
     @Override
     public List<AvailabilitySlot> findAllAvailable() {
-        return findMany(baseSql() + " WHERE a.available = 1 AND c.approval_status = 'APPROVED' ORDER BY a.start_datetime", null);
+        return this.findMany(baseSql() + " WHERE a.available = 1 AND c.approval_status = 'APPROVED' ORDER BY a.start_datetime", null);
     }
 
     @Override

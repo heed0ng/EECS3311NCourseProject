@@ -11,16 +11,14 @@ public interface AdminService {
     Consultant rejectConsultant(String adminId, String consultantId);
     CancellationPolicy updateCancellationPolicy(String adminId, int cancellationDeadlineHours);
     RefundPolicy updateRefundPolicy(String adminId, double refundPercentBeforeDeadline, double refundPercentAfterDeadline);
-    PricingPolicy updatePricingPolicy(String adminId, boolean allowConsultantCustomPrice);
+    CustomPricingPolicy updatePricingPolicy(String adminId, boolean allowConsultantCustomPrice);
     
-    NotificationPolicy updateNotificationPolicy(
-    		String adminId, boolean notifyOnBookingRequested,
-            boolean notifyOnBookingAccepted, boolean notifyOnBookingRejected,
-            boolean notifyOnPaymentProcessed, boolean notifyOnBookingCancelled,
-            boolean notifyOnConsultantApprovalDecision);
+    NotificationPolicy updateNotificationPolicy(String adminId, boolean notifyOnBookingRequested, boolean notifyOnBookingAccepted, 
+    		boolean notifyOnBookingRejected, boolean notifyOnPaymentProcessed, boolean notifyOnBookingCancelled,
+    		boolean notifyOnConsultantApprovalDecision);
     
     CancellationPolicy getCancellationPolicy();
     RefundPolicy getRefundPolicy();
-    PricingPolicy getPricingPolicy();
+    CustomPricingPolicy getPricingPolicy();
     NotificationPolicy getNotificationPolicy();
 }

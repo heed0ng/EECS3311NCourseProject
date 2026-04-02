@@ -1,4 +1,4 @@
-package payment;
+package paymentStrategy;
 
 import model.core.Booking;
 import model.payment.SavedPaymentMethod;

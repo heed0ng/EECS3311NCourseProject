@@ -6,9 +6,10 @@ import java.sql.ResultSet;
 
 import model.policy.CancellationPolicy;
 import model.policy.NotificationPolicy;
-import model.policy.PricingPolicy;
+import model.policy.CustomPricingPolicy;
 import model.policy.RefundPolicy;
 import repository.PolicyRepository;
+// Currently only 1 policy exsits for each category.
 
 public class SqlitePolicyRepository implements PolicyRepository {
     private final DatabaseManager databaseManager;
@@ -40,10 +41,10 @@ public class SqlitePolicyRepository implements PolicyRepository {
     }
 
     @Override
-    public PricingPolicy getPricingPolicy() {
+    public CustomPricingPolicy getPricingPolicy() {
         String sql = "SELECT * FROM pricing_policies LIMIT 1";
         try (Connection c = databaseManager.getConnection(); PreparedStatement s = c.prepareStatement(sql); ResultSet rs = s.executeQuery()) {
-            if (rs.next()) return new PricingPolicy(rs.getString("policy_id"), rs.getInt("allow_consultant_custom_price") == 1);
+            if (rs.next()) return new CustomPricingPolicy(rs.getString("policy_id"), rs.getInt("allow_consultant_custom_price") == 1);
             throw new RuntimeException("Pricing policy missing.");
         } catch (Exception e) {
             throw new RuntimeException("Failed to read pricing policy.", e);
@@ -89,7 +90,7 @@ public class SqlitePolicyRepository implements PolicyRepository {
     }
 
     @Override
-    public void savePricingPolicy(PricingPolicy policy) {
+    public void savePricingPolicy(CustomPricingPolicy policy) {
         String sql = "UPDATE pricing_policies SET allow_consultant_custom_price = ? WHERE policy_id = ?";
         try (Connection c = databaseManager.getConnection(); PreparedStatement s = c.prepareStatement(sql)) {
             s.setInt(1, policy.isAllowConsultantCustomPrice() ? 1 : 0);

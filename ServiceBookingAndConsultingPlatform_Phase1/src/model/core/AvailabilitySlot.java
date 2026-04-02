@@ -11,8 +11,7 @@ public class AvailabilitySlot {
     private LocalDateTime endDateTime;
     private boolean available;
 
-    public AvailabilitySlot(String slotId, Consultant consultant, LocalDateTime startDateTime,
-            LocalDateTime endDateTime, boolean available) {
+    public AvailabilitySlot(String slotId, Consultant consultant, LocalDateTime startDateTime, LocalDateTime endDateTime, boolean available) {
         this.slotId = slotId;
         this.consultant = consultant;
         this.startDateTime = startDateTime;
@@ -20,14 +19,14 @@ public class AvailabilitySlot {
         this.available = available;
     }
 
-    public String getSlotId() { return slotId; }
-    public Consultant getConsultant() { return consultant; }
+    public String getSlotId() { return this.slotId; }
+    public Consultant getConsultant() { return this.consultant; }
     public void setConsultant(Consultant consultant) { this.consultant = consultant; }
-    public LocalDateTime getStartDateTime() { return startDateTime; }
+    public LocalDateTime getStartDateTime() { return this.startDateTime; }
     public void setStartDateTime(LocalDateTime startDateTime) { this.startDateTime = startDateTime; }
-    public LocalDateTime getEndDateTime() { return endDateTime; }
+    public LocalDateTime getEndDateTime() { return this.endDateTime; }
     public void setEndDateTime(LocalDateTime endDateTime) { this.endDateTime = endDateTime; }
-    public boolean isAvailable() { return available; }
+    public boolean isAvailable() { return this.available; }
     public void setAvailable(boolean available) { this.available = available; }
 
     public boolean isOwnedBy(String consultantId) {

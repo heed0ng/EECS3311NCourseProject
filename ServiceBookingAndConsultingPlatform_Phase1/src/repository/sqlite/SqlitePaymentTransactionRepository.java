@@ -26,12 +26,12 @@ public class SqlitePaymentTransactionRepository implements PaymentTransactionRep
 
     @Override
     public List<PaymentTransaction> findByClient(String clientId) {
-        return findMany("SELECT * FROM payment_transactions WHERE client_id = ? ORDER BY created_at DESC", clientId);
+        return this.findMany("SELECT * FROM payment_transactions WHERE client_id = ? ORDER BY created_at DESC", clientId);
     }
 
     @Override
     public List<PaymentTransaction> findByBooking(String bookingId) {
-        return findMany("SELECT * FROM payment_transactions WHERE booking_id = ? ORDER BY created_at DESC", bookingId);
+        return this.findMany("SELECT * FROM payment_transactions WHERE booking_id = ? ORDER BY created_at DESC", bookingId);
     }
 
     @Override

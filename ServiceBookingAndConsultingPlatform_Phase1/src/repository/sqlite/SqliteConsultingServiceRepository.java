@@ -32,9 +32,9 @@ public class SqliteConsultingServiceRepository implements ConsultingServiceRepos
     }
 
     @Override
-    public List<ConsultingService> findAllActive() { return findByActive(true); }
+    public List<ConsultingService> findAllActive() { return this.findByActive(true); }
     @Override
-    public List<ConsultingService> findAll() { return findByActive(false, true); }
+    public List<ConsultingService> findAll() { return this.findByActive(false, true); }
 
     @Override
     public void save(ConsultingService service) {
@@ -53,6 +53,7 @@ public class SqliteConsultingServiceRepository implements ConsultingServiceRepos
     }
 
     private List<ConsultingService> findByActive(boolean active) { return findByActive(active, false); }
+    
     private List<ConsultingService> findByActive(boolean active, boolean ignoreFilter) {
         String sql = ignoreFilter ? "SELECT * FROM consulting_services ORDER BY name" : "SELECT * FROM consulting_services WHERE active = ? ORDER BY name";
         try (Connection connection = databaseManager.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {

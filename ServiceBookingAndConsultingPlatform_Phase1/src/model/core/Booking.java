@@ -27,19 +27,19 @@ public class Booking {
         this.agreedPrice = agreedPrice;
     }
 
-    public String getBookingId() { return bookingId; }
-    public Client getClient() { return client; }
-    public ConsultantServiceOffering getOffering() { return offering; }
-    public AvailabilitySlot getSlot() { return slot; }
-    public BookingState getState() { return state; }
-    public String getStateName() { return state.getName(); }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getLastUpdatedAt() { return lastUpdatedAt; }
-    public double getAgreedPrice() { return agreedPrice; }
+    public String getBookingId() { return this.bookingId; }
+    public Client getClient() { return this.client; }
+    public ConsultantServiceOffering getOffering() { return this.offering; }
+    public AvailabilitySlot getSlot() { return this.slot; }
+    public BookingState getState() { return this.state; }
+    public String getStateName() { return this.state.getName(); }
+    public LocalDateTime getCreatedAt() { return this.createdAt; }
+    public LocalDateTime getLastUpdatedAt() { return this.lastUpdatedAt; }
+    public double getAgreedPrice() { return this.agreedPrice; }
 
     public void setState(BookingState state) {
         this.state = state;
-        touch();
+        touch(); // To ensure db has correct time 
     }
 
     public void touch() { this.lastUpdatedAt = LocalDateTime.now(); }

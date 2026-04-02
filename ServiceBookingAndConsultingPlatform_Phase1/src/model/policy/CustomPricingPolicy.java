@@ -1,10 +1,10 @@
 package model.policy;
 
-public class PricingPolicy {
+public class CustomPricingPolicy {
     private final String policyId;
     private boolean allowConsultantCustomPrice;
 
-    public PricingPolicy(String policyId, boolean allowConsultantCustomPrice) {
+    public CustomPricingPolicy(String policyId, boolean allowConsultantCustomPrice) {
         this.policyId = policyId;
         this.allowConsultantCustomPrice = allowConsultantCustomPrice;
     }

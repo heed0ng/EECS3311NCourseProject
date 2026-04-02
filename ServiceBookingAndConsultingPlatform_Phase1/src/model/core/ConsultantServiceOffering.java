@@ -9,8 +9,7 @@ public class ConsultantServiceOffering {
     private Double customPrice;
     private boolean active;
 
-    public ConsultantServiceOffering(String offeringId, Consultant consultant, ConsultingService consultingService,
-            Double customPrice, boolean active) {
+    public ConsultantServiceOffering(String offeringId, Consultant consultant, ConsultingService consultingService, Double customPrice, boolean active) {
         this.offeringId = offeringId;
         this.consultant = consultant;
         this.consultingService = consultingService;

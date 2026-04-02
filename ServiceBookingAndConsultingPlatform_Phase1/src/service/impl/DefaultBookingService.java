@@ -36,12 +36,9 @@ public class DefaultBookingService implements BookingService {
     private final PolicyRepository policyRepository;
     private final EventPublisher eventPublisher;
 
-    public DefaultBookingService(ClientRepository clientRepository,
-            ConsultantServiceOfferingRepository offeringRepository,
-            AvailabilitySlotRepository availabilitySlotRepository,
-            BookingRepository bookingRepository,
-            PaymentTransactionRepository paymentTransactionRepository,
-            PolicyRepository policyRepository,
+    public DefaultBookingService(ClientRepository clientRepository, ConsultantServiceOfferingRepository offeringRepository,
+            AvailabilitySlotRepository availabilitySlotRepository, BookingRepository bookingRepository,
+            PaymentTransactionRepository paymentTransactionRepository, PolicyRepository policyRepository,
             EventPublisher eventPublisher, IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
 		this.clientRepository = clientRepository;
@@ -72,7 +69,7 @@ public class DefaultBookingService implements BookingService {
         String bookingId = idGenerator.nextId("bookings", "booking_id", "booking");
         Booking booking = new Booking(bookingId, client, offering, slot, new RequestedState(), now, now, offering.getEffectivePrice());
         slot.setAvailable(false);
-        bookingRepository.save(booking);
+        this.bookingRepository.save(booking);
         availabilitySlotRepository.save(slot);
         publishRequested(booking);
         return booking;
@@ -80,15 +77,15 @@ public class DefaultBookingService implements BookingService {
 
     @Override
     public Booking cancelBooking(String clientId, String bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException("Booking not found."));
+        Booking booking = this.bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException("Booking not found."));
         if (!booking.belongsToClient(clientId)) throw new BusinessRuleViolationException("Booking does not belong to the client.");
         LocalDateTime now = LocalDateTime.now();
-        var cancellationPolicy = policyRepository.getCancellationPolicy();
-        var refundPolicy = policyRepository.getRefundPolicy();
+        var cancellationPolicy = this.policyRepository.getCancellationPolicy();
+        var refundPolicy = this.policyRepository.getRefundPolicy();
         if (!cancellationPolicy.canCancel(booking, now)) throw new BusinessRuleViolationException("Cancellation deadline has passed.");
         double refundAmount = refundPolicy.calculateRefund(booking, now, cancellationPolicy);
         booking.cancel();
-        bookingRepository.save(booking);
+        this.bookingRepository.save(booking);
         booking.getSlot().setAvailable(true);
         availabilitySlotRepository.save(booking.getSlot());
         if (refundAmount > 0.0) {
@@ -101,33 +98,33 @@ public class DefaultBookingService implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookingHistory(String clientId) { return bookingRepository.findByClient(clientId); }
+    public List<Booking> getBookingHistory(String clientId) { return this.bookingRepository.findByClient(clientId); }
     @Override
-    public List<Booking> getAllBookings() { return bookingRepository.findAll(); }
+    public List<Booking> getAllBookings() { return this.bookingRepository.findAll(); }
     @Override
     public List<AvailabilitySlot> getAllAvailableSlots() { return availabilitySlotRepository.findAllAvailable(); }
 
     @Override
     public String getCancellationSummary(String clientId, String bookingId) {
-		Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException("Booking not found."));
+		Booking booking = this.bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException("Booking not found."));
 		if (!booking.belongsToClient(clientId)) throw new BusinessRuleViolationException("Booking does not belong to the client.");
 		LocalDateTime now = LocalDateTime.now();
-        var cancellationPolicy = policyRepository.getCancellationPolicy();
-        var refundPolicy = policyRepository.getRefundPolicy();
+        var cancellationPolicy = this.policyRepository.getCancellationPolicy();
+        var refundPolicy = this.policyRepository.getRefundPolicy();
         if (!cancellationPolicy.canCancel(booking, now)) return "Cancellation not allowed anymore.";
         double refund = refundPolicy.calculateRefund(booking, now, cancellationPolicy);
         return "Cancellation allowed. Current refund estimate: $" + String.format("%.2f", refund);
     }
 
     private void publishRequested(Booking booking) {
-        NotificationPolicy policy = policyRepository.getNotificationPolicy();
+        NotificationPolicy policy = this.policyRepository.getNotificationPolicy();
         if (policy.isNotifyOnBookingRequested()) {
             eventPublisher.publish(new BookingRequestedEvent(eventPublisher.nextEventId(), LocalDateTime.now(), "Booking requested by " + booking.getClient().getName() + " for service " + booking.getOffering().getConsultingService().getName() + "."));
         }
     }
 
     private void publishCancelled(Booking booking, double refundAmount) {
-        NotificationPolicy policy = policyRepository.getNotificationPolicy();
+        NotificationPolicy policy = this.policyRepository.getNotificationPolicy();
         if (policy.isNotifyOnBookingCancelled()) {
             eventPublisher.publish(new BookingCancelledEvent(eventPublisher.nextEventId(), LocalDateTime.now(), "Booking " + booking.getBookingId() + " was cancelled. Refund amount: $" + String.format("%.2f", refundAmount)));
         }

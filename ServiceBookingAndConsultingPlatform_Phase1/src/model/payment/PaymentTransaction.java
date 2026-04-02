@@ -18,9 +18,8 @@ public class PaymentTransaction {
     private final double amount;
     private final LocalDateTime createdAt;
 
-    public PaymentTransaction(String transactionId, Booking booking, Client client,
-            PaymentTransactionType transactionType, PaymentTransactionStatus status,
-            PaymentMethodType methodType, double amount, LocalDateTime createdAt) {
+    public PaymentTransaction(String transactionId, Booking booking, Client client, PaymentTransactionType transactionType, 
+    		PaymentTransactionStatus status, PaymentMethodType methodType, double amount, LocalDateTime createdAt) {
         this.transactionId = transactionId;
         this.booking = booking;
         this.client = client;

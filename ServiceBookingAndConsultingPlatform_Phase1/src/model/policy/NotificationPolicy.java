@@ -9,9 +9,8 @@ public class NotificationPolicy {
     private boolean notifyOnBookingCancelled;
     private boolean notifyOnConsultantApprovalDecision;
 
-    public NotificationPolicy(String policyId, boolean notifyOnBookingRequested, boolean notifyOnBookingAccepted,
-            boolean notifyOnBookingRejected, boolean notifyOnPaymentProcessed,
-            boolean notifyOnBookingCancelled, boolean notifyOnConsultantApprovalDecision) {
+    public NotificationPolicy(String policyId, boolean notifyOnBookingRequested, boolean notifyOnBookingAccepted, boolean notifyOnBookingRejected, 
+    		boolean notifyOnPaymentProcessed, boolean notifyOnBookingCancelled, boolean notifyOnConsultantApprovalDecision) {
         this.policyId = policyId;
         this.notifyOnBookingRequested = notifyOnBookingRequested;
         this.notifyOnBookingAccepted = notifyOnBookingAccepted;

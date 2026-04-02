@@ -24,9 +24,7 @@ public class SqliteConsultantRepository implements ConsultantRepository {
         try (Connection connection = databaseManager.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, consultantId);
             try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return Optional.of(map(resultSet));
-                }
+                if (resultSet.next()) return Optional.of(map(resultSet));
                 return Optional.empty();
             }
         } catch (Exception e) {
@@ -36,12 +34,12 @@ public class SqliteConsultantRepository implements ConsultantRepository {
 
     @Override
     public List<Consultant> findAllApproved() {
-        return findByStatus(ConsultantApprovalStatus.APPROVED.name());
+        return this.findByStatus(ConsultantApprovalStatus.APPROVED.name());
     }
 
     @Override
     public List<Consultant> findPendingApproval() {
-        return findByStatus(ConsultantApprovalStatus.PENDING.name());
+        return this.findByStatus(ConsultantApprovalStatus.PENDING.name());
     }
 
     @Override

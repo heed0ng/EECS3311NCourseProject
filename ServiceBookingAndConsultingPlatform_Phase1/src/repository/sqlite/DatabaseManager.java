@@ -9,6 +9,15 @@ public class DatabaseManager {
 
     public DatabaseManager(String databaseFilePath) {
         this.databaseUrl = "jdbc:sqlite:" + databaseFilePath;
+        loadSqliteDriver();
+    }
+
+    private void loadSqliteDriver() {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException exception) {
+            throw new RuntimeException("SQLite JDBC driver not found. Add sqlite-jdbc JAR to the project build path.", exception);
+        }
     }
 
     public Connection getConnection() throws SQLException {

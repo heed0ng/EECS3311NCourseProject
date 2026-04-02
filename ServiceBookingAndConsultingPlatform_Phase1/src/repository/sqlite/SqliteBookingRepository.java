@@ -48,22 +48,22 @@ public class SqliteBookingRepository implements BookingRepository {
 
     @Override
     public List<Booking> findByClient(String clientId) {
-        return findMany(baseSql() + " WHERE cl.user_id = ? ORDER BY b.created_at DESC", clientId);
+        return this.findMany(baseSql() + " WHERE cl.user_id = ? ORDER BY b.created_at DESC", clientId);
     }
 
     @Override
     public List<Booking> findByConsultant(String consultantId) {
-        return findMany(baseSql() + " WHERE c.user_id = ? ORDER BY b.created_at DESC", consultantId);
+        return this.findMany(baseSql() + " WHERE c.user_id = ? ORDER BY b.created_at DESC", consultantId);
     }
 
     @Override
     public List<Booking> findPendingRequestsForConsultant(String consultantId) {
-        return findMany(baseSql() + " WHERE c.user_id = ? AND b.state_name = 'Requested' ORDER BY b.created_at ASC", consultantId);
+        return this.findMany(baseSql() + " WHERE c.user_id = ? AND b.state_name = 'Requested' ORDER BY b.created_at ASC", consultantId);
     }
 
     @Override
     public List<Booking> findAll() {
-        return findMany(baseSql() + " ORDER BY b.created_at DESC", null);
+        return this.findMany(baseSql() + " ORDER BY b.created_at DESC", null);
     }
 
     @Override

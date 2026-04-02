@@ -46,7 +46,7 @@ public class DefaultConsultantService implements ConsultantService {
 
     @Override
     public AvailabilitySlot addAvailabilitySlot(String consultantId, LocalDateTime startDateTime, LocalDateTime endDateTime) {
-        var consultant = consultantRepository.findById(consultantId).orElseThrow(() -> new EntityNotFoundException("Consultant not found."));
+        var consultant = this.consultantRepository.findById(consultantId).orElseThrow(() -> new EntityNotFoundException("Consultant not found."));
         if (!consultant.isApproved()) throw new AuthorizationException("Consultant is not approved.");
         if (!startDateTime.isBefore(endDateTime)) throw new BusinessRuleViolationException("Slot start time must be before end time.");
         for (AvailabilitySlot slot : slotRepository.findByConsultant(consultantId)) {
@@ -55,36 +55,37 @@ public class DefaultConsultantService implements ConsultantService {
         
         String slotId = this.idGenerator.nextId("availability_slots", "slot_id", "slot");
         AvailabilitySlot slot = new AvailabilitySlot(slotId, consultant, startDateTime, endDateTime, true);
-        slotRepository.save(slot);
+        this.slotRepository.save(slot);
         return slot;
     }
 
     @Override
     public ConsultantServiceOffering addServiceOffering(String consultantId, String serviceId, Double customPrice) {
-        var consultant = consultantRepository.findById(consultantId).orElseThrow(() -> new EntityNotFoundException("Consultant not found."));
+        var consultant = this.consultantRepository.findById(consultantId).orElseThrow(() -> new EntityNotFoundException("Consultant not found."));
         if (!consultant.isApproved()) throw new AuthorizationException("Consultant is not approved.");
-        var pricingPolicy = policyRepository.getPricingPolicy();
+        var pricingPolicy = this.policyRepository.getPricingPolicy();
         if (!pricingPolicy.isAllowConsultantCustomPrice()) customPrice = null;
-        var service = consultingServiceRepository.findById(serviceId).orElseThrow(() -> new EntityNotFoundException("Consulting service not found."));
+        var service = this.consultingServiceRepository.findById(serviceId).orElseThrow(() -> new EntityNotFoundException("Consulting service not found."));
         
         String offeringId = this.idGenerator.nextId("consultant_service_offerings", "offering_id", "offering");
         ConsultantServiceOffering offering = new ConsultantServiceOffering(offeringId, consultant, service, customPrice, true);
-        offeringRepository.save(offering);
+        this.offeringRepository.save(offering);
         return offering;
     }
 
     @Override
     public List<AvailabilitySlot> getAvailabilitySlots(String consultantId) { return slotRepository.findByConsultant(consultantId); }
     @Override
-    public List<Booking> getPendingBookingRequests(String consultantId) { return bookingRepository.findPendingRequestsForConsultant(consultantId); }
+    public List<Booking> getPendingBookingRequests(String consultantId) { return this.bookingRepository.findPendingRequestsForConsultant(consultantId); }
 
     @Override
     public Booking acceptBookingRequest(String consultantId, String bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException("Booking not found."));
+        Booking booking = this.bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException("Booking not found."));
         ensureOwner(consultantId, booking);
         booking.confirm();
+        System.out.println("Booking confirmed");
         booking.moveToPendingPayment();
-        bookingRepository.save(booking);
+        this.bookingRepository.save(booking);
         if (policyRepository.getNotificationPolicy().isNotifyOnBookingAccepted()) {
             eventPublisher.publish(new BookingAcceptedEvent(eventPublisher.nextEventId(), LocalDateTime.now(), "Booking " + booking.getBookingId() + " was accepted and moved to pending payment."));
         }
@@ -93,12 +94,12 @@ public class DefaultConsultantService implements ConsultantService {
     
     @Override
     public Booking rejectBookingRequest(String consultantId, String bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException("Booking not found."));
+        Booking booking = this.bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException("Booking not found."));
         ensureOwner(consultantId, booking);
         booking.reject();
-        bookingRepository.save(booking);
+        this.bookingRepository.save(booking);
         booking.getSlot().setAvailable(true);
-        slotRepository.save(booking.getSlot());
+        this.slotRepository.save(booking.getSlot());
         if (policyRepository.getNotificationPolicy().isNotifyOnBookingRejected()) {
             eventPublisher.publish(new BookingRejectedEvent(eventPublisher.nextEventId(), LocalDateTime.now(), "Booking " + booking.getBookingId() + " was rejected by the consultant."));
         }

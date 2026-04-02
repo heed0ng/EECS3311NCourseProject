@@ -4,9 +4,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import model.notification.ConsultantApprovalEvent;
-import model.policy.*;
+import model.policy.CancellationPolicy;
+import model.policy.CustomPricingPolicy;
+import model.policy.NotificationPolicy;
+import model.policy.RefundPolicy;
+import model.user.Admin;
 import model.user.Consultant;
 import observer.EventPublisher;
+import repository.AdminRepository;
 import repository.ConsultantRepository;
 import repository.PolicyRepository;
 import service.AdminService;
@@ -15,72 +20,85 @@ import util.ConsultantApprovalStatus;
 import util.EntityNotFoundException;
 
 public class DefaultAdminService implements AdminService {
+    private final AdminRepository adminRepository;
     private final ConsultantRepository consultantRepository;
     private final PolicyRepository policyRepository;
     private final EventPublisher eventPublisher;
 
-    public DefaultAdminService(ConsultantRepository consultantRepository, PolicyRepository policyRepository, EventPublisher eventPublisher) {
+    public DefaultAdminService(AdminRepository adminRepository, ConsultantRepository consultantRepository, PolicyRepository policyRepository, EventPublisher eventPublisher) {
+        this.adminRepository = adminRepository;
         this.consultantRepository = consultantRepository;
         this.policyRepository = policyRepository;
         this.eventPublisher = eventPublisher;
     }
 
     @Override
-    public List<Consultant> getPendingConsultants() { return consultantRepository.findPendingApproval(); }
+    public List<Consultant> getPendingConsultants() {
+        return consultantRepository.findPendingApproval();
+    }
 
     @Override
     public Consultant approveConsultant(String adminId, String consultantId) {
-    	this.ensureValidAdmin(adminId);
-        Consultant consultant = consultantRepository.findById(consultantId).orElseThrow(() -> new EntityNotFoundException("Consultant not found."));
+        this.requireExistingAdmin(adminId);
+
+        Consultant consultant = consultantRepository.findById(consultantId)
+                .orElseThrow(() -> new EntityNotFoundException("Consultant not found."));
+
         consultant.setApprovalStatus(ConsultantApprovalStatus.APPROVED);
-        consultantRepository.save(consultant);
-        publishDecision(consultant, true);
+        this.consultantRepository.save(consultant);
+        this.publishDecision(consultant, true);
         return consultant;
     }
 
     @Override
     public Consultant rejectConsultant(String adminId, String consultantId) {
-    	this.ensureValidAdmin(adminId);
-        Consultant consultant = consultantRepository.findById(consultantId).orElseThrow(() -> new EntityNotFoundException("Consultant not found."));
+        this.requireExistingAdmin(adminId);
+
+        Consultant consultant = consultantRepository.findById(consultantId)
+                .orElseThrow(() -> new EntityNotFoundException("Consultant not found."));
+
         consultant.setApprovalStatus(ConsultantApprovalStatus.REJECTED);
-        consultantRepository.save(consultant);
-        publishDecision(consultant, false);
+        this.consultantRepository.save(consultant);
+        this.publishDecision(consultant, false);
         return consultant;
     }
 
     @Override
     public CancellationPolicy updateCancellationPolicy(String adminId, int cancellationDeadlineHours) {
-    	this.ensureValidAdmin(adminId);
-        CancellationPolicy policy = policyRepository.getCancellationPolicy();
+        this.requireExistingAdmin(adminId);
+
+        CancellationPolicy policy = this.policyRepository.getCancellationPolicy();
         policy.setCancellationDeadlineHours(cancellationDeadlineHours);
-        policyRepository.saveCancellationPolicy(policy);
+        this.policyRepository.saveCancellationPolicy(policy);
         return policy;
     }
 
     @Override
     public RefundPolicy updateRefundPolicy(String adminId, double refundPercentBeforeDeadline, double refundPercentAfterDeadline) {
-    	this.ensureValidAdmin(adminId);
-    	RefundPolicy policy = policyRepository.getRefundPolicy();
+        this.requireExistingAdmin(adminId);
+
+        RefundPolicy policy = this.policyRepository.getRefundPolicy();
         policy.setRefundPercentBeforeDeadline(refundPercentBeforeDeadline);
         policy.setRefundPercentAfterDeadline(refundPercentAfterDeadline);
-        policyRepository.saveRefundPolicy(policy);
+        this.policyRepository.saveRefundPolicy(policy);
         return policy;
     }
 
     @Override
-    public PricingPolicy updatePricingPolicy(String adminId, boolean allowConsultantCustomPrice) {
-    	this.ensureValidAdmin(adminId);
-    	PricingPolicy policy = policyRepository.getPricingPolicy();
+    public CustomPricingPolicy updatePricingPolicy(String adminId, boolean allowConsultantCustomPrice) {
+        this.requireExistingAdmin(adminId);
+
+        CustomPricingPolicy policy = this.policyRepository.getPricingPolicy();
         policy.setAllowConsultantCustomPrice(allowConsultantCustomPrice);
-        policyRepository.savePricingPolicy(policy);
+        this.policyRepository.savePricingPolicy(policy);
         return policy;
     }
 
     @Override
-    public NotificationPolicy updateNotificationPolicy(String adminId, boolean notifyOnBookingRequested,
-            boolean notifyOnBookingAccepted, boolean notifyOnBookingRejected,boolean notifyOnPaymentProcessed, 
-            boolean notifyOnBookingCancelled, boolean notifyOnConsultantApprovalDecision) {
-    	this.ensureValidAdmin(adminId);
+    public NotificationPolicy updateNotificationPolicy(String adminId, boolean notifyOnBookingRequested, boolean notifyOnBookingAccepted, boolean notifyOnBookingRejected,
+            boolean notifyOnPaymentProcessed, boolean notifyOnBookingCancelled, boolean notifyOnConsultantApprovalDecision) {
+        this.requireExistingAdmin(adminId);
+
         NotificationPolicy policy = policyRepository.getNotificationPolicy();
         policy.setNotifyOnBookingRequested(notifyOnBookingRequested);
         policy.setNotifyOnBookingAccepted(notifyOnBookingAccepted);
@@ -88,28 +106,42 @@ public class DefaultAdminService implements AdminService {
         policy.setNotifyOnPaymentProcessed(notifyOnPaymentProcessed);
         policy.setNotifyOnBookingCancelled(notifyOnBookingCancelled);
         policy.setNotifyOnConsultantApprovalDecision(notifyOnConsultantApprovalDecision);
-        policyRepository.saveNotificationPolicy(policy);
+        this.policyRepository.saveNotificationPolicy(policy);
         return policy;
     }
 
     @Override
-    public CancellationPolicy getCancellationPolicy() { return policyRepository.getCancellationPolicy(); }
+    public CancellationPolicy getCancellationPolicy() {
+        return this.policyRepository.getCancellationPolicy();
+    }
+
     @Override
-    public RefundPolicy getRefundPolicy() { return policyRepository.getRefundPolicy(); }
+    public RefundPolicy getRefundPolicy() {
+        return this.policyRepository.getRefundPolicy();
+    }
+
     @Override
-    public PricingPolicy getPricingPolicy() { return policyRepository.getPricingPolicy(); }
+    public CustomPricingPolicy getPricingPolicy() {
+        return this.policyRepository.getPricingPolicy();
+    }
+
     @Override
-    public NotificationPolicy getNotificationPolicy() { return policyRepository.getNotificationPolicy(); }
+    public NotificationPolicy getNotificationPolicy() {
+        return this.policyRepository.getNotificationPolicy();
+    }
+
+    private Admin requireExistingAdmin(String adminId) {
+        if (adminId == null || adminId.isBlank()) throw new AuthorizationException("Admin ID is required.");
+        return adminRepository.findById(adminId).orElseThrow(() -> new AuthorizationException("Only a persisted admin can perform this action."));
+    }
 
     private void publishDecision(Consultant consultant, boolean approved) {
         if (policyRepository.getNotificationPolicy().isNotifyOnConsultantApprovalDecision()) {
-            String message = approved ? "Consultant " + consultant.getName() + " was approved." : "Consultant " + consultant.getName() + " was rejected.";
+            String message = approved
+                    ? "Consultant " + consultant.getName() + " was approved."
+                    : "Consultant " + consultant.getName() + " was rejected.";
+
             eventPublisher.publish(new ConsultantApprovalEvent(eventPublisher.nextEventId(), LocalDateTime.now(), message));
         }
-    }
-    
-    private void ensureValidAdmin(String adminId) {
-        if (adminId == null || adminId.isBlank())  throw new AuthorizationException("Admin ID is required.");
-        if (!"admin-1".equals(adminId)) throw new AuthorizationException("Only an authorized admin can perform this action.");
     }
 }

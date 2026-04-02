@@ -8,8 +8,7 @@ public class ConsultingService {
     private double basePrice;
     private boolean active;
 
-    public ConsultingService(String serviceId, String name, String description, int durationMinutes,
-            double basePrice, boolean active) {
+    public ConsultingService(String serviceId, String name, String description, int durationMinutes, double basePrice, boolean active) {
         this.serviceId = serviceId;
         this.name = name;
         this.description = description;

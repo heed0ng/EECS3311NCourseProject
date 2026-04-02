@@ -8,7 +8,7 @@ public abstract class DomainEvent {
     private final String eventType;
     private final String message;
 
-    protected DomainEvent(String eventId, LocalDateTime occurredAt, String eventType, String message) {
+    public DomainEvent(String eventId, LocalDateTime occurredAt, String eventType, String message) {
         this.eventId = eventId;
         this.occurredAt = occurredAt;
         this.eventType = eventType;
