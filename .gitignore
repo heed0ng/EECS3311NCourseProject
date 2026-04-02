@@ -1,0 +1,31 @@
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Build output
+bin/
+out/
+build/
+target/
+
+# Java compiled files
+*.class
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Libraries / local jars
+lib/
+*.jar

@@ -1,0 +1,224 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+hide empty members
+
+package "model.user" {
+  abstract class User
+  class Client extends User
+  class Consultant extends User
+  class Admin extends User
+}
+
+package "model.core" {
+  class ConsultingService
+  class AvailabilitySlot
+  class ConsultantServiceOffering
+  class Booking
+}
+
+package "model.payment" {
+  class SavedPaymentMethod
+  class PaymentTransaction
+}
+
+package "model.policy" {
+  class CancellationPolicy
+  class NotificationPolicy
+  class CustomPricingPolicy
+  class RefundPolicy
+}
+
+package "model.notification" {
+  abstract class DomainEvent
+  class BookingRequestedEvent extends DomainEvent
+  class BookingAcceptedEvent extends DomainEvent
+  class BookingRejectedEvent extends DomainEvent
+  class BookingCancelledEvent extends DomainEvent
+  class PaymentProcessedEvent extends DomainEvent
+  class ConsultantApprovalEvent extends DomainEvent
+}
+
+package state {
+  interface BookingState
+  abstract class AbstractBookingState implements BookingState
+  class RequestedState extends AbstractBookingState
+  class ConfirmedState extends AbstractBookingState
+  class PendingPaymentState extends AbstractBookingState
+  class PaidState extends AbstractBookingState
+  class RejectedState extends AbstractBookingState
+  class CancelledState extends AbstractBookingState
+  class CompletedState extends AbstractBookingState
+}
+
+package paymentStrategy {
+  interface PaymentMethodStrategy
+  class CreditCardPaymentStrategy implements PaymentMethodStrategy
+  class DebitCardPaymentStrategy implements PaymentMethodStrategy
+  class PayPalPaymentStrategy implements PaymentMethodStrategy
+  class BankTransferPaymentStrategy implements PaymentMethodStrategy
+  class PaymentStrategyFactory
+}
+
+package observer {
+  interface Observer
+  class ClientObserver implements Observer
+  class ConsultantObserver implements Observer
+  class AdminObserver implements Observer
+  class EventPublisher
+}
+
+package repository {
+  interface AvailabilitySlotRepository
+  interface BookingRepository
+  interface ClientRepository
+  interface ConsultantRepository
+  interface ConsultantServiceOfferingRepository
+  interface ConsultingServiceRepository
+  interface PaymentTransactionRepository
+  interface PolicyRepository
+  interface SavedPaymentMethodRepository
+}
+
+package "repository.sqlite" {
+  class DatabaseManager
+  class IdGenerator
+  class SchemaInitializer
+
+  class SqliteAvailabilitySlotRepository
+  class SqliteBookingRepository
+  class SqliteClientRepository
+  class SqliteConsultantRepository
+  class SqliteConsultantServiceOfferingRepository
+  class SqliteConsultingServiceRepository
+  class SqlitePaymentTransactionRepository
+  class SqlitePolicyRepository
+  class SqliteSavedPaymentMethodRepository
+
+  AvailabilitySlotRepository <|.. SqliteAvailabilitySlotRepository
+  BookingRepository <|.. SqliteBookingRepository
+  ClientRepository <|.. SqliteClientRepository
+  ConsultantRepository <|.. SqliteConsultantRepository
+  ConsultantServiceOfferingRepository <|.. SqliteConsultantServiceOfferingRepository
+  ConsultingServiceRepository <|.. SqliteConsultingServiceRepository
+  PaymentTransactionRepository <|.. SqlitePaymentTransactionRepository
+  PolicyRepository <|.. SqlitePolicyRepository
+  SavedPaymentMethodRepository <|.. SqliteSavedPaymentMethodRepository
+}
+
+package service {
+  interface AdminService
+  interface BookingService
+  interface ConsultantService
+  interface PaymentService
+}
+
+package "service.impl" {
+  class DefaultAdminService
+  class DefaultBookingService
+  class DefaultConsultantService
+  class DefaultPaymentService
+
+  AdminService <|.. DefaultAdminService
+  BookingService <|.. DefaultBookingService
+  ConsultantService <|.. DefaultConsultantService
+  PaymentService <|.. DefaultPaymentService
+}
+
+package util {
+  enum ConsultantApprovalStatus
+  enum PaymentMethodType
+  enum PaymentTransactionStatus
+  enum PaymentTransactionType
+
+  class AuthorizationException
+  class BusinessRuleViolationException
+  class EntityNotFoundException
+}
+
+package ui {
+  class TerminalUI
+}
+
+' Domain relations
+AvailabilitySlot --> Consultant
+ConsultantServiceOffering --> Consultant
+ConsultantServiceOffering --> ConsultingService
+
+Booking --> Client
+Booking --> ConsultantServiceOffering
+Booking --> AvailabilitySlot
+Booking --> BookingState
+
+PaymentTransaction --> Booking
+PaymentTransaction --> Client
+SavedPaymentMethod --> Client
+
+' Pattern relations
+PaymentStrategyFactory --> PaymentMethodStrategy: selects
+EventPublisher --> DomainEvent : publishes
+EventPublisher o-- Observer
+Observer --> DomainEvent : subscribes/receives
+
+' Service dependencies
+AdminService --> CancellationPolicy
+AdminService --> NotificationPolicy
+AdminService --> CustomPricingPolicy
+AdminService --> RefundPolicy
+DefaultAdminService --> ConsultantRepository
+DefaultAdminService --> PolicyRepository
+DefaultAdminService --> EventPublisher
+
+DefaultBookingService --> IdGenerator
+DefaultBookingService --> BookingRepository
+DefaultBookingService --> ClientRepository
+DefaultBookingService --> ConsultantServiceOfferingRepository
+DefaultBookingService --> AvailabilitySlotRepository
+DefaultBookingService --> PolicyRepository
+DefaultBookingService --> EventPublisher
+
+DefaultConsultantService --> IdGenerator
+DefaultConsultantService --> ConsultingServiceRepository
+DefaultConsultantService --> ConsultantRepository
+DefaultConsultantService --> ConsultantServiceOfferingRepository
+DefaultConsultantService --> AvailabilitySlotRepository
+DefaultConsultantService --> PolicyRepository
+DefaultConsultantService --> BookingRepository
+DefaultConsultantService --> EventPublisher
+
+DefaultPaymentService --> IdGenerator
+DefaultPaymentService --> ClientRepository
+DefaultPaymentService --> PaymentTransactionRepository
+DefaultPaymentService --> SavedPaymentMethodRepository
+DefaultPaymentService --> BookingRepository
+DefaultPaymentService --> PolicyRepository
+DefaultPaymentService --> PaymentStrategyFactory
+DefaultPaymentService --> EventPublisher
+
+TerminalUI --> BookingService
+TerminalUI --> ConsultantService
+TerminalUI --> PaymentService
+TerminalUI --> AdminService
+
+' SQLite dependencies
+SqliteAvailabilitySlotRepository --> DatabaseManager
+SqliteBookingRepository --> DatabaseManager
+SqliteClientRepository --> DatabaseManager
+SqliteConsultantRepository --> DatabaseManager
+SqliteConsultantServiceOfferingRepository --> DatabaseManager
+SqliteConsultingServiceRepository --> DatabaseManager
+SqlitePaymentTransactionRepository --> DatabaseManager
+SqlitePolicyRepository --> DatabaseManager
+SqliteSavedPaymentMethodRepository --> DatabaseManager
+IdGenerator --> DatabaseManager
+SchemaInitializer --> DatabaseManager
+
+' Enum uses
+Consultant --> ConsultantApprovalStatus
+PaymentTransaction --> PaymentTransactionType
+PaymentTransaction --> PaymentTransactionStatus
+SavedPaymentMethod --> PaymentMethodType
+PaymentStrategyFactory --> PaymentMethodType
+
+@enduml

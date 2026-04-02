@@ -1,0 +1,53 @@
+@startuml
+left to right direction
+
+actor "Client"
+actor "Consultant"
+actor "Admin"
+
+rectangle "Service Booking & Consulting Platform" {
+  usecase "Browse Consulting Services" as UC1
+  usecase "Request a Booking" as UC2
+  usecase "Cancel a Booking" as UC3
+  usecase "View Booking History" as UC4
+  usecase "Process Payment" as UC5
+  usecase "Manage Payment Methods" as UC6
+  usecase "View Payment History" as UC7
+
+  usecase "Manage Availability" as UC8
+  usecase "Accept or Reject Booking Request" as UC9
+  usecase "Complete a Booking" as UC10
+
+  usecase "Approve or Reject Consultant Registration" as UC11
+  usecase "Define System Policies" as UC12
+  usecase "Configure System Policies" as UC12.1
+}
+
+Client --> UC1
+Client --> UC2
+Client --> UC3
+Client --> UC4
+Client --> UC5
+Client --> UC6
+Client --> UC7
+
+Consultant --> UC8
+Consultant --> UC9
+Consultant --> UC10
+
+Admin --> UC11
+Admin --> UC12
+
+UC6 ..> UC5 : <<extend>>
+UC12 ..> UC12.1 : <<include>>
+
+note right of UC12
+Policies can contain:  
+• Cancellation rules 
+• Pricing strategies 
+• Notification settings 
+• Refund policies
+However, simplified and only one policy for each.
+end note
+
+@enduml
