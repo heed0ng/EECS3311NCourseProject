@@ -13,7 +13,7 @@ public class ClientObserver implements Observer {
 
     @Override
     public void update(DomainEvent event) {
-        System.out.println("[Notification][Client: " + this.name + "] " + event.getMessage());
+        System.out.println("[Notification][Client Observer: " + this.name + "] " + "Accepted event type '" + event.getEventType() + "': " + event.getMessage());
     }
 
     @Override

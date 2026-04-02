@@ -34,14 +34,14 @@ public class DefaultAdminService implements AdminService {
 
     @Override
     public List<Consultant> getPendingConsultants() {
-        return consultantRepository.findPendingApproval();
+        return this.consultantRepository.findPendingApproval();
     }
 
     @Override
     public Consultant approveConsultant(String adminId, String consultantId) {
         this.requireExistingAdmin(adminId);
 
-        Consultant consultant = consultantRepository.findById(consultantId)
+        Consultant consultant = this.consultantRepository.findById(consultantId)
                 .orElseThrow(() -> new EntityNotFoundException("Consultant not found."));
 
         consultant.setApprovalStatus(ConsultantApprovalStatus.APPROVED);
@@ -84,7 +84,7 @@ public class DefaultAdminService implements AdminService {
         return policy;
     }
 
-    @Override
+    @Override // Allowing Custom pricing set by consultant rather than using base price
     public CustomPricingPolicy updatePricingPolicy(String adminId, boolean allowConsultantCustomPrice) {
         this.requireExistingAdmin(adminId);
 
@@ -99,7 +99,7 @@ public class DefaultAdminService implements AdminService {
             boolean notifyOnPaymentProcessed, boolean notifyOnBookingCancelled, boolean notifyOnConsultantApprovalDecision) {
         this.requireExistingAdmin(adminId);
 
-        NotificationPolicy policy = policyRepository.getNotificationPolicy();
+        NotificationPolicy policy = this.policyRepository.getNotificationPolicy();
         policy.setNotifyOnBookingRequested(notifyOnBookingRequested);
         policy.setNotifyOnBookingAccepted(notifyOnBookingAccepted);
         policy.setNotifyOnBookingRejected(notifyOnBookingRejected);

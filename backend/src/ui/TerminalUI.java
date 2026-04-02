@@ -66,7 +66,7 @@ public class TerminalUI {
         this.adminRepository = sqliteAdminRepository;
         
         this.bookingService = new DefaultBookingService(clientRepository, offeringRepository, slotRepository, bookingRepository, paymentTransactionRepository, policyRepository, eventPublisher, idGenerator);
-        this.consultantService = new DefaultConsultantService(consultantRepository, consultingServiceRepository, offeringRepository, slotRepository, bookingRepository, policyRepository, eventPublisher, idGenerator);
+        this.consultantService = new DefaultConsultantService(consultantRepository, consultingServiceRepository, offeringRepository, slotRepository, bookingRepository, paymentTransactionRepository, policyRepository, eventPublisher, idGenerator);
         this.paymentService = new DefaultPaymentService(clientRepository, bookingRepository, savedPaymentMethodRepository, paymentTransactionRepository, policyRepository, eventPublisher, new PaymentStrategyFactory(), idGenerator);
         this.adminService = new DefaultAdminService(adminRepository, consultantRepository, policyRepository, eventPublisher);
     }
@@ -332,42 +332,105 @@ public class TerminalUI {
     }
 
     private void seedDemoDataIfNeeded() {
-        if (!clientRepository.findAll().isEmpty()) return;
-        clientRepository.save(new Client("client-1", "Alice Client", "alice@example.com"));
-        clientRepository.save(new Client("client-2", "Bob Client", "bob@example.com"));
-        consultantRepository.save(new Consultant("consultant-1", "Charlie Consultant", "char@example.com", ConsultantApprovalStatus.APPROVED));
-        consultantRepository.save(new Consultant("consultant-2", "Dr. Doom Consultant", "doom@example.com", ConsultantApprovalStatus.PENDING));
-        consultingServiceRepository.save(new ConsultingService("service-1", "Software Design Consulting", "UML, patterns, architecture review.", 60, 120.0, true));
-        consultingServiceRepository.save(new ConsultingService("service-2", "Career Coaching", "Interview and resume consultation.", 45, 90.0, true));
-        consultingServiceRepository.save(new ConsultingService("service-3", "Medical Checkup", "Basic Medical Examination for further check", 40, 300.0, true));
-        consultingServiceRepository.save(new ConsultingService("service-4", "Time Management Advise", "Weekly/mothly/yearly time management strategies setup", 55, 50.0, true));
-        offeringRepository.save(new ConsultantServiceOffering("offering-1", consultantRepository.findById("consultant-1").orElseThrow(), consultingServiceRepository.findById("service-1").orElseThrow(), 140.0, true));
-        offeringRepository.save(new ConsultantServiceOffering("offering-2", consultantRepository.findById("consultant-1").orElseThrow(), consultingServiceRepository.findById("service-2").orElseThrow(), null, true));
-        slotRepository.save(new AvailabilitySlot("slot-1", consultantRepository.findById("consultant-1").orElseThrow(), LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0), LocalDateTime.now().plusDays(1).withHour(11).withMinute(0).withSecond(0).withNano(0), true));
-        slotRepository.save(new AvailabilitySlot("slot-2", consultantRepository.findById("consultant-1").orElseThrow(), LocalDateTime.now().plusDays(1).withHour(14).withMinute(0).withSecond(0).withNano(0), LocalDateTime.now().plusDays(1).withHour(15).withMinute(0).withSecond(0).withNano(0), true));
-        slotRepository.save(new AvailabilitySlot("slot-3", consultantRepository.findById("consultant-1").orElseThrow(), LocalDateTime.now().plusDays(2).withHour(14).withMinute(0).withSecond(0).withNano(0), LocalDateTime.now().plusDays(2).withHour(15).withMinute(0).withSecond(0).withNano(0), true));
-        paymentService.addSavedPaymentMethod("client-1", PaymentMethodType.CREDIT_CARD, "Alice Visa", "1111111111111111", "12/30|123");
-        paymentService.addSavedPaymentMethod("client-1", PaymentMethodType.PAYPAL, "Alice PayPal", "alice@example.com", "");
+        seedDemoClientsIfMissing();
+        seedDemoConsultantsIfMissing();
+        seedDemoServicesIfMissing();
+        seedDemoOfferingsIfMissing();
+        seedDemoSlotsIfMissing();
+        seedDemoPaymentMethodsIfMissing();
         insertAdminIfMissing("admin-1", "System Admin", "admin@example.com");
+    }
+    
+    private void seedDemoClientsIfMissing() {
+        if (clientRepository.findById("client-1").isEmpty()) clientRepository.save(new Client("client-1", "Alice Client", "alice@example.com"));
+        if (clientRepository.findById("client-2").isEmpty()) clientRepository.save(new Client("client-2", "Bob Client", "bob@example.com"));
+    }
+
+    private void seedDemoConsultantsIfMissing() {
+        if (consultantRepository.findById("consultant-1").isEmpty()) {
+            consultantRepository.save(new Consultant("consultant-1", "Charlie Consultant", "char@example.com", ConsultantApprovalStatus.APPROVED));
+        }
+
+        if (consultantRepository.findById("consultant-2").isEmpty()) {
+            consultantRepository.save(new Consultant("consultant-2", "Dr. Doom Consultant", "doom@example.com", ConsultantApprovalStatus.PENDING));
+        }
+    }
+
+    private void seedDemoServicesIfMissing() {
+        if (consultingServiceRepository.findById("service-1").isEmpty()) {
+            consultingServiceRepository.save(new ConsultingService("service-1", "Software Design Consulting", "UML, patterns, architecture review.", 60, 120.0, true));
+        }
+
+        if (consultingServiceRepository.findById("service-2").isEmpty()) {
+            consultingServiceRepository.save(new ConsultingService("service-2", "Career Coaching", "Interview and resume consultation.", 45, 90.0, true));
+        }
+        
+        if (consultingServiceRepository.findById("service-3").isEmpty()) {
+            consultingServiceRepository.save(new ConsultingService("service-3", "Medical Checkup", "Basic Medical Checkup routine.", 50, 500.0, true));
+        }
+        
+        if (consultingServiceRepository.findById("service-4").isEmpty()) {
+            consultingServiceRepository.save(new ConsultingService("service-4", "Time Management Coaching", "Weekly/Monthly/Yearly Time managing strategy setup.", 30, 60.0, true));
+        }
+    }
+
+    private void seedDemoOfferingsIfMissing() {
+        Consultant consultant = consultantRepository.findById("consultant-1").orElseThrow(() -> new IllegalStateException("Missing seeded consultant consultant-1."));
+        ConsultingService service1 = consultingServiceRepository.findById("service-1").orElseThrow(() -> new IllegalStateException("Missing seeded service service-1."));
+        ConsultingService service2 = consultingServiceRepository.findById("service-2").orElseThrow(() -> new IllegalStateException("Missing seeded service service-2."));
+        ConsultingService service3 = consultingServiceRepository.findById("service-3").orElseThrow(() -> new IllegalStateException("Missing seeded service service-3."));
+        ConsultingService service4 = consultingServiceRepository.findById("service-4").orElseThrow(() -> new IllegalStateException("Missing seeded service service-4."));
+
+        if (offeringRepository.findById("offering-1").isEmpty()) {
+            offeringRepository.save(new ConsultantServiceOffering("offering-1", consultant, service1, 140.0, true));
+        }
+
+        if (offeringRepository.findById("offering-2").isEmpty()) {
+            offeringRepository.save(new ConsultantServiceOffering("offering-2", consultant, service2, null, true));
+        }
+    }
+
+    private void seedDemoSlotsIfMissing() {
+        Consultant consultant = consultantRepository.findById("consultant-1")
+                .orElseThrow(() -> new IllegalStateException("Missing seeded consultant consultant-1."));
+
+        LocalDateTime slot1Start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime slot1End = LocalDateTime.now().plusDays(1).withHour(11).withMinute(0).withSecond(0).withNano(0);
+
+        LocalDateTime slot2Start = LocalDateTime.now().plusDays(1).withHour(14).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime slot2End = LocalDateTime.now().plusDays(1).withHour(15).withMinute(0).withSecond(0).withNano(0);
+
+        LocalDateTime slot3Start = LocalDateTime.now().plusDays(2).withHour(14).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime slot3End = LocalDateTime.now().plusDays(2).withHour(15).withMinute(0).withSecond(0).withNano(0);
+
+        if (slotRepository.findById("slot-1").isEmpty()) slotRepository.save(new AvailabilitySlot("slot-1", consultant, slot1Start, slot1End, true));
+        if (slotRepository.findById("slot-2").isEmpty()) slotRepository.save(new AvailabilitySlot("slot-2", consultant, slot2Start, slot2End, true));
+        if (slotRepository.findById("slot-3").isEmpty()) slotRepository.save(new AvailabilitySlot("slot-3", consultant, slot3Start, slot3End, true));
+    }
+
+    private void seedDemoPaymentMethodsIfMissing() {
+        boolean hasAliceVisa = paymentService.getSavedPaymentMethods("client-1").stream().anyMatch(method -> "Alice Visa".equals(method.getDisplayLabel()));
+        if (!hasAliceVisa) paymentService.addSavedPaymentMethod("client-1", PaymentMethodType.CREDIT_CARD, "Alice Visa", "1111111111111111", "12/30|123");
+        boolean hasAlicePaypal = paymentService.getSavedPaymentMethods("client-1").stream().anyMatch(method -> "Alice PayPal".equals(method.getDisplayLabel()));
+        if (!hasAlicePaypal) paymentService.addSavedPaymentMethod("client-1", PaymentMethodType.PAYPAL, "Alice PayPal", "alice@example.com", "");
     }
 
     private void subscribeDefaultObservers() {
-        eventPublisher.subscribe(new AdminObserver("observer-admin-1", "System Admin"));
-        eventPublisher.subscribe(new ClientObserver("observer-client-1", "Alice Client"));
-        eventPublisher.subscribe(new ConsultantObserver("observer-consultant-1", "Charlie Consultant"));
+        System.out.println("[Startup] Subscribing console demo observers from seeded persisted users.");
+
+        consultantRepository.findById("consultant-1").ifPresent(consultant -> eventPublisher.subscribe(new ConsultantObserver("observer-consultant-" + consultant.getUserId(), consultant.getName())));
+        clientRepository.findById("client-1").ifPresent(client -> eventPublisher.subscribe(new ClientObserver("observer-client-" + client.getUserId(), client.getName())));
+        adminRepository.findById("admin-1").ifPresent(admin -> eventPublisher.subscribe(new AdminObserver("observer-admin-" + admin.getUserId(), admin.getName())));
     }
 
     private void insertAdminIfMissing(String adminId, String name, String email) {
-        if (adminRepository.findById(adminId).isPresent()) {
-            return;
-        }
+        if (adminRepository.findById(adminId).isPresent()) return;
         adminRepository.save(new Admin(adminId, name, email));
     }
 
     private void printDemoIds() {
     	System.out.println("\nDemo IDs");
-        System.out.println("Admin: admin-1 | System Admin");
-        
+        System.out.println("Admin: admin-1 | System Admin"); 
         System.out.println("Clients: ");
         printClients(clientRepository.findAll());
         System.out.println("Consultants:");

@@ -13,8 +13,9 @@ public class AdminObserver implements Observer {
 
     @Override
     public void update(DomainEvent event) {
-        System.out.println("[Notification][Admin: " + this.name + "] " + event.getMessage());
+        System.out.println("[Notification][Admin Observer: " + this.name + "] " + "Accepted event type '" + event.getEventType() + "': " + event.getMessage());
     }
+
 
     @Override
     public String getObserverId() {

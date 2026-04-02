@@ -52,14 +52,14 @@ public class DefaultBookingService implements BookingService {
 
     @Override
     public List<ConsultantServiceOffering> browseAvailableOfferings() {
-        return offeringRepository.findAllActive();
+        return this.offeringRepository.findAllActive();
     }
 
     @Override
     public Booking requestBooking(String clientId, String offeringId, String slotId) {
-        var client = clientRepository.findById(clientId).orElseThrow(() -> new EntityNotFoundException("Client not found."));
-        var offering = offeringRepository.findById(offeringId).orElseThrow(() -> new EntityNotFoundException("Offering not found."));
-        var slot = availabilitySlotRepository.findById(slotId).orElseThrow(() -> new EntityNotFoundException("Availability slot not found."));
+        var client = this.clientRepository.findById(clientId).orElseThrow(() -> new EntityNotFoundException("Client not found."));
+        var offering = this.offeringRepository.findById(offeringId).orElseThrow(() -> new EntityNotFoundException("Offering not found."));
+        var slot = this.availabilitySlotRepository.findById(slotId).orElseThrow(() -> new EntityNotFoundException("Availability slot not found."));
         if (!offering.getConsultant().isApproved()) throw new BusinessRuleViolationException("Cannot book a consultant who is not approved.");
         if (!offering.isActive()) throw new BusinessRuleViolationException("Offering is inactive.");
         if (!slot.isAvailable()) throw new BusinessRuleViolationException("Selected slot is not available.");
@@ -70,8 +70,8 @@ public class DefaultBookingService implements BookingService {
         Booking booking = new Booking(bookingId, client, offering, slot, new RequestedState(), now, now, offering.getEffectivePrice());
         slot.setAvailable(false);
         this.bookingRepository.save(booking);
-        availabilitySlotRepository.save(slot);
-        publishRequested(booking);
+        this.availabilitySlotRepository.save(slot);
+        this.publishRequested(booking);
         return booking;
     }
 
@@ -87,13 +87,13 @@ public class DefaultBookingService implements BookingService {
         booking.cancel();
         this.bookingRepository.save(booking);
         booking.getSlot().setAvailable(true);
-        availabilitySlotRepository.save(booking.getSlot());
+        this.availabilitySlotRepository.save(booking.getSlot());
         if (refundAmount > 0.0) {
         	String transactionId = idGenerator.nextId("payment_transactions", "transaction_id", "transaction");
             PaymentTransaction refund = new PaymentTransaction(transactionId, booking, booking.getClient(), PaymentTransactionType.REFUND, PaymentTransactionStatus.SUCCESS, PaymentMethodType.BANK_TRANSFER, refundAmount, now);
-            paymentTransactionRepository.save(refund);
+            this.paymentTransactionRepository.save(refund);
         }
-        publishCancelled(booking, refundAmount);
+        this.publishCancelled(booking, refundAmount);
         return booking;
     }
 
@@ -102,7 +102,7 @@ public class DefaultBookingService implements BookingService {
     @Override
     public List<Booking> getAllBookings() { return this.bookingRepository.findAll(); }
     @Override
-    public List<AvailabilitySlot> getAllAvailableSlots() { return availabilitySlotRepository.findAllAvailable(); }
+    public List<AvailabilitySlot> getAllAvailableSlots() { return this.availabilitySlotRepository.findAllAvailable(); }
 
     @Override
     public String getCancellationSummary(String clientId, String bookingId) {

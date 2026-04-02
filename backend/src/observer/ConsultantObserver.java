@@ -13,7 +13,7 @@ public class ConsultantObserver implements Observer {
 
     @Override
     public void update(DomainEvent event) {
-        System.out.println("[Notification][Consultant: " + this.name + "] " + event.getMessage());
+        System.out.println("[Console Notification Demo][Consultant Observer: " + this.name + "] " + "Accepted event type '" + event.getEventType() + "': " + event.getMessage());
     }
 
     @Override
