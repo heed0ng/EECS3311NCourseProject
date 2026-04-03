@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client - Browse Services</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Client - Browse Consulting Services</h1>
+        <nav>
+            <a href="client-home.html">Client Home</a>
+            <a href="client-bookings.html">My Bookings</a>
+            <a href="client-payment-methods.html">Payment Methods</a>
+            <a href="client-payments.html">Payments</a>
+            <a href="client-chatbot.html">AI Assistant</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Available Offerings</h2>
+            <button id="load-offerings-button">Load Services</button>
+
+            <table id="offerings-table">
+                <thead>
+                    <tr>
+                        <th>Offering ID</th>
+                        <th>Service Name</th>
+                        <th>Consultant</th>
+                        <th>Duration</th>
+                        <th>Base Price</th>
+                        <th>Description</th>
+                        <th>Select</th>
+                    </tr>
+                </thead>
+                <tbody id="offerings-table-body">
+                </tbody>
+            </table>
+        </section>
+
+        <section class="panel">
+            <h2>Available Slots for Selected Offering</h2>
+            <div>
+                <label for="selected-offering-id">Selected Offering ID:</label>
+                <input id="selected-offering-id" type="text" readonly>
+            </div>
+
+            <div>
+                <label for="slot-select">Choose Slot:</label>
+                <select id="slot-select">
+                    <option value="">-- Select a slot --</option>
+                </select>
+            </div>
+
+            <button id="load-slots-button">Load Slots</button>
+        </section>
+
+        <section class="panel">
+            <h2>Request Booking</h2>
+
+            <div>
+                <label for="client-id-input">Client ID:</label>
+                <input id="client-id-input" type="text" value="client-1">
+            </div>
+
+            <div>
+                <label for="request-offering-id-input">Offering ID:</label>
+                <input id="request-offering-id-input" type="text" readonly>
+            </div>
+
+            <div>
+                <label for="request-slot-id-input">Slot ID:</label>
+                <input id="request-slot-id-input" type="text" readonly>
+            </div>
+
+            <button id="request-booking-button">Request Booking</button>
+
+            <p id="request-booking-message"></p>
+        </section>
+    </main>
+
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
+    <script src="js/client/client-services.js"></script>
+</body>
+</html>
