@@ -3,39 +3,12 @@ package backend.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import observer.EventPublisher;
-import paymentStrategy.PaymentStrategyFactory;
-import repository.AdminRepository;
-import repository.AvailabilitySlotRepository;
-import repository.BookingRepository;
-import repository.ClientRepository;
-import repository.ConsultantRepository;
-import repository.ConsultantServiceOfferingRepository;
-import repository.ConsultingServiceRepository;
-import repository.PaymentTransactionRepository;
-import repository.PolicyRepository;
-import repository.SavedPaymentMethodRepository;
-import repository.sqlite.DatabaseManager;
-import repository.sqlite.IdGenerator;
-import repository.sqlite.SchemaInitializer;
-import repository.sqlite.SqliteAdminRepository;
-import repository.sqlite.SqliteAvailabilitySlotRepository;
-import repository.sqlite.SqliteBookingRepository;
-import repository.sqlite.SqliteClientRepository;
-import repository.sqlite.SqliteConsultantRepository;
-import repository.sqlite.SqliteConsultantServiceOfferingRepository;
-import repository.sqlite.SqliteConsultingServiceRepository;
-import repository.sqlite.SqlitePaymentTransactionRepository;
-import repository.sqlite.SqlitePolicyRepository;
-import repository.sqlite.SqliteSavedPaymentMethodRepository;
-import service.AdminService;
-import service.BookingService;
-import service.ConsultantService;
-import service.PaymentService;
-import service.impl.DefaultAdminService;
-import service.impl.DefaultBookingService;
-import service.impl.DefaultConsultantService;
-import service.impl.DefaultPaymentService;
+import backend.observer.EventPublisher;
+import backend.paymentStrategy.PaymentStrategyFactory;
+import backend.repository.*;
+import backend.repository.*;
+import backend.service.*;
+import backend.service.*;
 
 @Configuration
 public class ApplicationConfig {

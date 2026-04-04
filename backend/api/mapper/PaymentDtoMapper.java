@@ -1,4 +1,4 @@
-package api.mapper;
+package backend.api.mapper;
 
 public class PaymentDtoMapper {
 

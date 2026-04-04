@@ -1,4 +1,4 @@
-package repository.sqlite;
+package backend.repository.sqlite;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import model.user.Admin;
-import repository.AdminRepository;
+import backend.model.user.Admin;
+import backend.repository.AdminRepository;
 
 public class SqliteAdminRepository implements AdminRepository {
     private final DatabaseManager databaseManager;

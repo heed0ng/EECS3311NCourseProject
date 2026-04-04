@@ -1,6 +1,6 @@
-package model.core;
+package backend.model.core;
 
-import model.user.Consultant;
+import backend.model.user.Consultant;
 
 public class ConsultantServiceOffering {
     private final String offeringId;

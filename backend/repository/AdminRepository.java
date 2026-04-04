@@ -1,9 +1,9 @@
-package repository;
+package backend.repository;
 
 import java.util.List;
 import java.util.Optional;
 
-import model.user.Admin;
+import backend.model.user.Admin;
 
 public interface AdminRepository {
     Optional<Admin> findById(String adminId);

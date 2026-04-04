@@ -1,4 +1,4 @@
-package repository.sqlite;
+package backend.repository.sqlite;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,11 +7,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.payment.PaymentTransaction;
-import repository.PaymentTransactionRepository;
-import util.PaymentMethodType;
-import util.PaymentTransactionStatus;
-import util.PaymentTransactionType;
+import backend.model.payment.PaymentTransaction;
+import backend.repository.PaymentTransactionRepository;
+import backend.util.*;
 
 public class SqlitePaymentTransactionRepository implements PaymentTransactionRepository {
     private final DatabaseManager databaseManager;

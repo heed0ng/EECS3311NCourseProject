@@ -1,23 +1,20 @@
-package service.impl;
+package backend.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import model.notification.ConsultantApprovalEvent;
-import model.policy.CancellationPolicy;
-import model.policy.CustomPricingPolicy;
-import model.policy.NotificationPolicy;
-import model.policy.RefundPolicy;
-import model.user.Admin;
-import model.user.Consultant;
-import observer.EventPublisher;
-import repository.AdminRepository;
-import repository.ConsultantRepository;
-import repository.PolicyRepository;
-import service.AdminService;
-import util.AuthorizationException;
-import util.ConsultantApprovalStatus;
-import util.EntityNotFoundException;
+import backend.model.notification.ConsultantApprovalEvent;
+import backend.model.policy.*;
+import backend.model.user.Admin;
+import backend.model.user.Consultant;
+import backend.observer.EventPublisher;
+import backend.repository.AdminRepository;
+import backend.repository.ConsultantRepository;
+import backend.repository.PolicyRepository;
+import backend.service.AdminService;
+import backend.util.AuthorizationException;
+import backend.util.ConsultantApprovalStatus;
+import backend.util.EntityNotFoundException;
 
 public class DefaultAdminService implements AdminService {
     private final AdminRepository adminRepository;

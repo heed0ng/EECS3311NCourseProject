@@ -1,14 +1,11 @@
-package repository.sqlite;
+package backend.repository.sqlite;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-import model.policy.CancellationPolicy;
-import model.policy.NotificationPolicy;
-import model.policy.CustomPricingPolicy;
-import model.policy.RefundPolicy;
-import repository.PolicyRepository;
+import backend.model.policy.*;
+import backend.repository.PolicyRepository;
 // Currently only 1 policy exsits for each category.
 
 public class SqlitePolicyRepository implements PolicyRepository {

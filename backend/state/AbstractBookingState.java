@@ -1,7 +1,7 @@
-package state;
+package backend.state;
 
-import model.core.Booking;
-import util.BusinessRuleViolationException;
+import backend.model.core.Booking;
+import backend.util.BusinessRuleViolationException;
 
 public abstract class AbstractBookingState implements BookingState {
     @Override

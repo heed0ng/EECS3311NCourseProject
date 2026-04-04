@@ -10,36 +10,30 @@ import backend.api.dto.response.AvailabilitySlotResponse;
 import backend.api.dto.response.OfferingSummaryResponse;
 import backend.api.mapper.AvailabilitySlotDtoMapper;
 import backend.api.mapper.OfferingDtoMapper;
-
-import service.BookingService;
-import service.ConsultantService;
-import model.core.ConsultantServiceOffering;
-import model.core.AvailabilitySlot;
+import backend.model.core.AvailabilitySlot;
+import backend.model.core.ConsultantServiceOffering;
+import backend.service.BookingService;
 
 @RestController
 @RequestMapping("/api/client")
 @CrossOrigin(origins = "*")
 public class ClientOfferingController {
 
-    // Replace with your real service type(s)
-    private final ConsultantService consultantService;
     private final BookingService bookingService;
 
-    public ClientOfferingController() {
-        // TEMPORARY PLACEHOLDER
-        // Replace with your real service construction or dependency injection
-        this.consultantService = null;
-        this.bookingService = null;
+    public ClientOfferingController(BookingService bookingService) {
+        this.bookingService = bookingService;
     }
 
     @GetMapping("/offerings")
     public ResponseEntity<List<OfferingSummaryResponse>> getAvailableOfferings() {
+        List<ConsultantServiceOffering> offerings = this.bookingService.browseAvailableOfferings();
         List<OfferingSummaryResponse> responses = new ArrayList<>();
-        List<ConsultantServiceOffering> offerings = this.consultantService.getAvailableOfferings();
 
         for (ConsultantServiceOffering currentOffering : offerings) {
             responses.add(OfferingDtoMapper.toOfferingSummaryResponse(currentOffering));
         }
+
         return ResponseEntity.ok(responses);
     }
 
@@ -47,12 +41,24 @@ public class ClientOfferingController {
     public ResponseEntity<List<AvailabilitySlotResponse>> getAvailableSlotsByOfferingId(
             @PathVariable String offeringId) {
 
+        List<AvailabilitySlot> allAvailableSlots = this.bookingService.getAllAvailableSlots();
         List<AvailabilitySlotResponse> responses = new ArrayList<>();
 
-        List<AvailabilitySlot> slots = this.bookingService.getAvailableSlotsForOffering(offeringId);
+        for (AvailabilitySlot currentSlot : allAvailableSlots) {
+            if (currentSlot.getConsultant() != null
+                    && currentSlot.getConsultant().getUserId() != null) {
 
-        for (AvailabilitySlot currentSlot : slots) {
-            responses.add(AvailabilitySlotDtoMapper.toAvailabilitySlotResponse(currentSlot));
+                for (ConsultantServiceOffering currentOffering : this.bookingService.browseAvailableOfferings()) {
+                    if (currentOffering.getOfferingId().equals(offeringId)
+                            && currentOffering.getConsultant() != null
+                            && currentSlot.getConsultant().getUserId()
+                                    .equals(currentOffering.getConsultant().getUserId())) {
+
+                        responses.add(
+                                AvailabilitySlotDtoMapper.toAvailabilitySlotResponse(currentSlot, offeringId));
+                    }
+                }
+            }
         }
 
         return ResponseEntity.ok(responses);

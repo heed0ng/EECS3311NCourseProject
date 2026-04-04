@@ -1,4 +1,4 @@
-package repository.sqlite;
+package backend.repository.sqlite;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import model.core.ConsultingService;
-import repository.ConsultingServiceRepository;
+import backend.model.core.ConsultingService;
+import backend.repository.ConsultingServiceRepository;
 
 public class SqliteConsultingServiceRepository implements ConsultingServiceRepository {
     private final DatabaseManager databaseManager;

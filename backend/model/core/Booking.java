@@ -1,9 +1,9 @@
-package model.core;
+package backend.model.core;
 
 import java.time.LocalDateTime;
 
-import model.user.Client;
-import state.BookingState;
+import backend.model.user.Client;
+import backend.state.BookingState;
 
 public class Booking {
     private final String bookingId;

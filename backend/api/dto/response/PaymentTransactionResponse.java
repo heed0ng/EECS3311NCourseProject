@@ -1,4 +1,4 @@
-package api.dto.response;
+package backend.api.dto.response;
 
 public class PaymentTransactionResponse {
     private String paymentTransactionId;

@@ -1,4 +1,4 @@
-package repository.sqlite;
+package backend.repository.sqlite;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import model.payment.SavedPaymentMethod;
-import model.user.Client;
-import repository.SavedPaymentMethodRepository;
-import util.PaymentMethodType;
+import backend.model.payment.SavedPaymentMethod;
+import backend.model.user.Client;
+import backend.repository.SavedPaymentMethodRepository;
+import backend.util.PaymentMethodType;
 
 public class SqliteSavedPaymentMethodRepository implements SavedPaymentMethodRepository {
     private final DatabaseManager databaseManager;

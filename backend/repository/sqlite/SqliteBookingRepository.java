@@ -1,4 +1,4 @@
-package repository.sqlite;
+package backend.repository.sqlite;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,22 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import model.core.AvailabilitySlot;
-import model.core.Booking;
-import model.core.ConsultantServiceOffering;
-import model.core.ConsultingService;
-import model.user.Client;
-import model.user.Consultant;
-import repository.BookingRepository;
-import state.BookingState;
-import state.CancelledState;
-import state.CompletedState;
-import state.ConfirmedState;
-import state.PaidState;
-import state.PendingPaymentState;
-import state.RejectedState;
-import state.RequestedState;
-import util.ConsultantApprovalStatus;
+import backend.model.core.*;
+import backend.model.user.Client;
+import backend.model.user.Consultant;
+import backend.repository.BookingRepository;
+import backend.state.*;
+import backend.util.ConsultantApprovalStatus;
 
 public class SqliteBookingRepository implements BookingRepository {
     private final DatabaseManager databaseManager;

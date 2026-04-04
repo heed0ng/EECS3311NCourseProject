@@ -1,4 +1,4 @@
-package repository.sqlite;
+package backend.repository.sqlite;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import model.core.AvailabilitySlot;
-import model.user.Consultant;
-import repository.AvailabilitySlotRepository;
-import util.ConsultantApprovalStatus;
+import backend.model.core.AvailabilitySlot;
+import backend.model.user.Consultant;
+import backend.repository.AvailabilitySlotRepository;
+import backend.util.ConsultantApprovalStatus;
 
 public class SqliteAvailabilitySlotRepository implements AvailabilitySlotRepository {
     private final DatabaseManager databaseManager;

@@ -1,4 +1,4 @@
-package api.exception;
+package backend.api.exception;
 
 public class ErrorResponse {
 

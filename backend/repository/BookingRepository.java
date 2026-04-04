@@ -1,9 +1,9 @@
-package repository;
+package backend.repository;
 
 import java.util.List;
 import java.util.Optional;
 
-import model.core.Booking;
+import backend.model.core.Booking;
 
 public interface BookingRepository {
     Optional<Booking> findById(String bookingId);

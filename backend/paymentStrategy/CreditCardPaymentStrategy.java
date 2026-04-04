@@ -1,9 +1,9 @@
-package paymentStrategy;
+package backend.paymentStrategy;
 
-import model.core.Booking;
-import model.payment.SavedPaymentMethod;
-import util.BusinessRuleViolationException;
-import util.PaymentMethodType;
+import backend.model.core.Booking;
+import backend.model.payment.SavedPaymentMethod;
+import backend.util.BusinessRuleViolationException;
+import backend.util.PaymentMethodType;
 
 public class CreditCardPaymentStrategy implements PaymentMethodStrategy {
     @Override

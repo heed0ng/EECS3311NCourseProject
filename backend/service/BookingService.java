@@ -1,10 +1,8 @@
-package service;
+package backend.service;
 
 import java.util.List;
 
-import model.core.AvailabilitySlot;
-import model.core.Booking;
-import model.core.ConsultantServiceOffering;
+import backend.model.core.*;
 
 public interface BookingService {
     List<ConsultantServiceOffering> browseAvailableOfferings();

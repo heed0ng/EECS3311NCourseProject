@@ -1,8 +1,8 @@
-package model.core;
+package backend.model.core;
 
 import java.time.LocalDateTime;
 
-import model.user.Consultant;
+import backend.model.user.Consultant;
 
 public class AvailabilitySlot {
     private final String slotId;

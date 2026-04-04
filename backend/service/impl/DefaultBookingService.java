@@ -1,30 +1,26 @@
-package service.impl;
+package backend.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import model.core.AvailabilitySlot;
-import model.core.Booking;
-import model.core.ConsultantServiceOffering;
-import model.notification.BookingCancelledEvent;
-import model.notification.BookingRequestedEvent;
-import model.payment.PaymentTransaction;
-import model.policy.NotificationPolicy;
-import repository.AvailabilitySlotRepository;
-import repository.BookingRepository;
-import repository.ClientRepository;
-import repository.ConsultantServiceOfferingRepository;
-import repository.PaymentTransactionRepository;
-import repository.PolicyRepository;
-import repository.sqlite.IdGenerator;
-import service.BookingService;
-import observer.EventPublisher;
-import state.RequestedState;
-import util.BusinessRuleViolationException;
-import util.EntityNotFoundException;
-import util.PaymentMethodType;
-import util.PaymentTransactionStatus;
-import util.PaymentTransactionType;
+import backend.model.core.AvailabilitySlot;
+import backend.model.core.Booking;
+import backend.model.core.ConsultantServiceOffering;
+import backend.model.notification.BookingCancelledEvent;
+import backend.model.notification.BookingRequestedEvent;
+import backend.model.payment.PaymentTransaction;
+import backend.model.policy.NotificationPolicy;
+import backend.repository.AvailabilitySlotRepository;
+import backend.repository.BookingRepository;
+import backend.repository.ClientRepository;
+import backend.repository.ConsultantServiceOfferingRepository;
+import backend.repository.PaymentTransactionRepository;
+import backend.repository.PolicyRepository;
+import backend.repository.sqlite.IdGenerator;
+import backend.service.BookingService;
+import backend.observer.EventPublisher;
+import backend.state.RequestedState;
+import backend.util.*;
 
 public class DefaultBookingService implements BookingService {
 	private final IdGenerator idGenerator;

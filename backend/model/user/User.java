@@ -1,4 +1,4 @@
-package model.user;
+package backend.model.user;
 
 public abstract class User {
     private final String userId;

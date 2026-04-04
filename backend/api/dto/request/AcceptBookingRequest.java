@@ -1,4 +1,4 @@
-package api.dto.request;
+package backend.api.dto.request;
 
 public class AcceptBookingRequest {
 

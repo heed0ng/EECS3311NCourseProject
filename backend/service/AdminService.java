@@ -1,9 +1,9 @@
-package service;
+package backend.service;
 
 import java.util.List;
 
-import model.policy.*;
-import model.user.Consultant;
+import backend.model.policy.*;
+import backend.model.user.Consultant;
 
 public interface AdminService {
     List<Consultant> getPendingConsultants();

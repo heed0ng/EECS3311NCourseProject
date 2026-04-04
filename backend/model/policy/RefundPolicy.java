@@ -1,8 +1,8 @@
-package model.policy;
+package backend.model.policy;
 
 import java.time.LocalDateTime;
 
-import model.core.Booking;
+import backend.model.core.Booking;
 
 public class RefundPolicy {
     private final String policyId;

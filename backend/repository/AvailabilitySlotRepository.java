@@ -1,9 +1,9 @@
-package repository;
+package backend.repository;
 
 import java.util.List;
 import java.util.Optional;
 
-import model.core.AvailabilitySlot;
+import backend.model.core.AvailabilitySlot;
 
 public interface AvailabilitySlotRepository {
     Optional<AvailabilitySlot> findById(String slotId);

@@ -1,4 +1,4 @@
-package model.core;
+package backend.model.core;
 
 public class ConsultingService {
     private final String serviceId;

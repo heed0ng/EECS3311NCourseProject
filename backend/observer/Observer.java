@@ -1,6 +1,6 @@
-package observer;
+package backend.observer;
 
-import model.notification.DomainEvent;
+import backend.model.notification.DomainEvent;
 
 public interface Observer {
     void update(DomainEvent event);

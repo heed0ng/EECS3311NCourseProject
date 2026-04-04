@@ -1,4 +1,4 @@
-package service.impl;
+package backend.service.impl;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -7,19 +7,19 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import model.notification.PaymentProcessedEvent;
-import model.payment.PaymentTransaction;
-import model.payment.SavedPaymentMethod;
-import observer.EventPublisher;
-import paymentStrategy.PaymentStrategyFactory;
-import repository.BookingRepository;
-import repository.ClientRepository;
-import repository.PaymentTransactionRepository;
-import repository.PolicyRepository;
-import repository.SavedPaymentMethodRepository;
-import repository.sqlite.IdGenerator;
-import service.PaymentService;
-import util.*;
+import backend.model.notification.PaymentProcessedEvent;
+import backend.model.payment.PaymentTransaction;
+import backend.model.payment.SavedPaymentMethod;
+import backend.observer.EventPublisher;
+import backend.paymentStrategy.PaymentStrategyFactory;
+import backend.repository.BookingRepository;
+import backend.repository.ClientRepository;
+import backend.repository.PaymentTransactionRepository;
+import backend.repository.PolicyRepository;
+import backend.repository.SavedPaymentMethodRepository;
+import backend.repository.sqlite.IdGenerator;
+import backend.service.PaymentService;
+import backend.util.*;
 
 public class DefaultPaymentService implements PaymentService {
     private final IdGenerator idGenerator;

@@ -1,6 +1,6 @@
-package observer;
+package backend.observer;
 
-import model.notification.DomainEvent;
+import backend.model.notification.DomainEvent;
 
 public class ConsultantObserver implements Observer {
     private final String observerId;

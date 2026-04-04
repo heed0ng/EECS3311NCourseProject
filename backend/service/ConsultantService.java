@@ -1,11 +1,9 @@
-package service;
+package backend.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import model.core.AvailabilitySlot;
-import model.core.Booking;
-import model.core.ConsultantServiceOffering;
+import backend.model.core.*;
 
 public interface ConsultantService {
     AvailabilitySlot addAvailabilitySlot(String consultantId, LocalDateTime startDateTime, LocalDateTime endDateTime);

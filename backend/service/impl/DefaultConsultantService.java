@@ -1,19 +1,19 @@
-package service.impl;
+package backend.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import model.core.AvailabilitySlot;
-import model.core.Booking;
-import model.core.ConsultantServiceOffering;
-import model.notification.BookingAcceptedEvent;
-import model.notification.BookingRejectedEvent;
-import model.payment.PaymentTransaction;
-import observer.EventPublisher;
-import repository.*;
-import repository.sqlite.IdGenerator;
-import service.ConsultantService;
-import util.*;
+import backend.model.core.AvailabilitySlot;
+import backend.model.core.Booking;
+import backend.model.core.ConsultantServiceOffering;
+import backend.model.notification.BookingAcceptedEvent;
+import backend.model.notification.BookingRejectedEvent;
+import backend.model.payment.PaymentTransaction;
+import backend.observer.EventPublisher;
+import backend.repository.*;
+import backend.repository.sqlite.IdGenerator;
+import backend.service.ConsultantService;
+import backend.util.*;
 
 public class DefaultConsultantService implements ConsultantService {
     private final IdGenerator idGenerator;

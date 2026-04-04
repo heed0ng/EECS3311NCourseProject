@@ -1,20 +1,20 @@
-package ui;
+package backend.ui;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 
-import model.core.*;
-import model.payment.*;
-import model.user.*;
-import observer.*;
-import paymentStrategy.PaymentStrategyFactory;
-import repository.*;
-import repository.sqlite.*;
-import util.*;
-import service.*;
-import service.impl.*;
+import backend.model.core.*;
+import backend.model.payment.*;
+import backend.model.user.*;
+import backend.observer.*;
+import backend.paymentStrategy.PaymentStrategyFactory;
+import backend.repository.*;
+import backend.repository.sqlite.*;
+import backend.util.*;
+import backend.service.*;
+import backend.service.impl.*;
 
 public class TerminalUI {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");

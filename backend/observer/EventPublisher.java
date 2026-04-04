@@ -1,9 +1,9 @@
-package observer;
+package backend.observer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import model.notification.DomainEvent;
+import backend.model.notification.DomainEvent;
 
 public class EventPublisher {
     private final List<Observer> observers;

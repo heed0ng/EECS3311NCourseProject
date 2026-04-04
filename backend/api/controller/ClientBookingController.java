@@ -5,20 +5,17 @@ import org.springframework.web.bind.annotation.*;
 
 import backend.api.dto.request.RequestBookingRequest;
 import backend.api.dto.response.ActionResultResponse;
-import service.BookingService;
+import backend.service.BookingService;
 
 @RestController
 @RequestMapping("/api/client")
 @CrossOrigin(origins = "*")
 public class ClientBookingController {
 
-    // Replace Object with your real BookingService type
-    private final Object bookingService;
+    private final BookingService bookingService;
 
-    public ClientBookingController() {
-        // TEMPORARY PLACEHOLDER
-        // Replace with real construction or dependency injection
-        this.bookingService = null;
+    public ClientBookingController(BookingService bookingService) {
+        this.bookingService = bookingService;
     }
 
     @PostMapping("/bookings")
@@ -26,19 +23,16 @@ public class ClientBookingController {
             @RequestBody RequestBookingRequest requestBookingRequest) {
 
         try {
- 
-            this.bookingService.requestBooking(requestBookingRequest.getClientId(),
-                    requestBookingRequest.getOfferingId(),requestBookingRequest.getSlotId());
+            this.bookingService.requestBooking(
+                    requestBookingRequest.getClientId(),
+                    requestBookingRequest.getOfferingId(),
+                    requestBookingRequest.getSlotId());
 
-            ActionResultResponse response =  new ActionResultResponse(true, "Booking request submitted successfully.");
-
-            return ResponseEntity.ok(response);
-
+            return ResponseEntity.ok(
+                    new ActionResultResponse(true, "Booking request submitted successfully."));
         } catch (Exception exception) {
-            ActionResultResponse response =
-                    new ActionResultResponse(false, exception.getMessage());
-
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest().body(
+                    new ActionResultResponse(false, exception.getMessage()));
         }
     }
 }
