@@ -107,15 +107,16 @@ public class DefaultPaymentService implements PaymentService {
 
         PaymentTransaction pendingTransaction = this.findPendingPaymentTransactionForBooking(bookingId);
         PaymentTransaction transactionToSave;
+        LocalDateTime processedAt = LocalDateTime.now();
 
         if (pendingTransaction != null) {
-            transactionToSave = new PaymentTransaction(pendingTransaction.getTransactionId(), booking, booking.getClient(), PaymentTransactionType.PAYMENT,
-                    PaymentTransactionStatus.SUCCESS, method.getMethodType(), booking.getPrice(), pendingTransaction.getCreatedAt()
-            );
+            transactionToSave = new PaymentTransaction(pendingTransaction.getTransactionId(), booking, booking.getClient(),
+                    PaymentTransactionType.PAYMENT, PaymentTransactionStatus.SUCCESS, method.getMethodType(), 
+                    booking.getPrice(), processedAt);
         } else {
             String transactionId = idGenerator.nextId("payment_transactions", "transaction_id", "transaction");
             transactionToSave = new PaymentTransaction(transactionId, booking, booking.getClient(), PaymentTransactionType.PAYMENT,
-                    PaymentTransactionStatus.SUCCESS, method.getMethodType(), booking.getPrice(), LocalDateTime.now());
+                    PaymentTransactionStatus.SUCCESS, method.getMethodType(), booking.getPrice(), processedAt);
         }
 
         this.paymentTransactionRepository.save(transactionToSave);

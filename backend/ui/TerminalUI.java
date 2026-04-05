@@ -350,9 +350,14 @@ public class TerminalUI {
         if (consultantRepository.findById("consultant-1").isEmpty()) {
             consultantRepository.save(new Consultant("consultant-1", "Charlie Consultant", "char@example.com", ConsultantApprovalStatus.APPROVED));
         }
-
         if (consultantRepository.findById("consultant-2").isEmpty()) {
             consultantRepository.save(new Consultant("consultant-2", "Dr. Doom Consultant", "doom@example.com", ConsultantApprovalStatus.PENDING));
+        }
+        if (consultantRepository.findById("consultant-3").isEmpty()) {
+            consultantRepository.save(new Consultant("consultant-3", "Eric Consultant", "eric@example.com", ConsultantApprovalStatus.PENDING));
+        }
+        if (consultantRepository.findById("consultant-4").isEmpty()) {
+            consultantRepository.save(new Consultant("consultant-3", "Fred Consultant", "fred@example.com", ConsultantApprovalStatus.PENDING));
         }
     }
 
@@ -360,15 +365,12 @@ public class TerminalUI {
         if (consultingServiceRepository.findById("service-1").isEmpty()) {
             consultingServiceRepository.save(new ConsultingService("service-1", "Software Design Consulting", "UML, patterns, architecture review.", 60, 120.0, true));
         }
-
         if (consultingServiceRepository.findById("service-2").isEmpty()) {
             consultingServiceRepository.save(new ConsultingService("service-2", "Career Coaching", "Interview and resume consultation.", 45, 90.0, true));
         }
-        
         if (consultingServiceRepository.findById("service-3").isEmpty()) {
             consultingServiceRepository.save(new ConsultingService("service-3", "Medical Checkup", "Basic Medical Checkup routine.", 50, 500.0, true));
         }
-        
         if (consultingServiceRepository.findById("service-4").isEmpty()) {
             consultingServiceRepository.save(new ConsultingService("service-4", "Time Management Coaching", "Weekly/Monthly/Yearly Time managing strategy setup.", 30, 60.0, true));
         }

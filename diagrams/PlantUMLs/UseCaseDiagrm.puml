@@ -38,7 +38,6 @@ Consultant --> UC10
 Admin --> UC11
 Admin --> UC12
 
-UC6 ..> UC5 : <<extend>>
 UC12 ..> UC12.1 : <<include>>
 
 note right of UC12
