@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client - Booking History</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Client - Booking History</h1>
+        <nav>
+            <a href="client-home.html">Client Home</a>
+            <a href="client-services.html">Browse Services</a>
+            <a href="client-payment-methods.html">Payment Methods</a>
+            <a href="client-payments.html">Payments</a>
+            <a href="client-chatbot.html">AI Assistant</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Load My Bookings</h2>
+
+            <div>
+                <label for="client-id-input">Client ID:</label>
+                <input id="client-id-input" type="text" value="client-1">
+            </div>
+
+            <button id="load-bookings-button">Load Booking History</button>
+            <p id="booking-history-message"></p>
+        </section>
+
+        <section class="panel">
+            <h2>Booking History</h2>
+
+            <table id="bookings-table">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Service Name</th>
+                        <th>Consultant</th>
+                        <th>Slot ID</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Status</th>
+                        <th>Price</th>
+						<th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="bookings-table-body">
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
+    <script src="js/client/client-bookings.js"></script>
+</body>
+</html>

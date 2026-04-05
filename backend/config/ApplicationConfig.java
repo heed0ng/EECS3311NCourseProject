@@ -6,10 +6,9 @@ import org.springframework.context.annotation.Configuration;
 import backend.observer.EventPublisher;
 import backend.paymentStrategy.PaymentStrategyFactory;
 import backend.repository.*;
-import backend.repository.*;
+import backend.repository.sqlite.*;
 import backend.service.*;
-import backend.service.*;
-
+import backend.service.impl.*;
 @Configuration
 public class ApplicationConfig {
 
@@ -69,15 +68,15 @@ public class ApplicationConfig {
     @Bean
     public SavedPaymentMethodRepository savedPaymentMethodRepository(
             DatabaseManager databaseManager,
-            ClientRepository clientRepository) {
+            SqliteClientRepository clientRepository) {
         return new SqliteSavedPaymentMethodRepository(databaseManager, clientRepository);
     }
 
     @Bean
     public PaymentTransactionRepository paymentTransactionRepository(
             DatabaseManager databaseManager,
-            BookingRepository bookingRepository,
-            ClientRepository clientRepository) {
+            SqliteBookingRepository bookingRepository,
+            SqliteClientRepository clientRepository) {
         return new SqlitePaymentTransactionRepository(databaseManager, bookingRepository, clientRepository);
     }
 
@@ -165,5 +164,15 @@ public class ApplicationConfig {
                 consultantRepository,
                 policyRepository,
                 eventPublisher);
+    }
+    
+    @Bean
+    public ClientAssistantService clientAssistantService(
+            BookingService bookingService,
+            PolicyRepository policyRepository) {
+
+        return new DefaultClientAssistantService(
+                bookingService,
+                policyRepository);
     }
 }

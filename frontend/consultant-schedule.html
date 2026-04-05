@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultant - Schedule</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Consultant - Schedule</h1>
+        <nav>
+            <a href="consultant-home.html">Consultant Home</a>
+            <a href="consultant-availability.html">Manage Availability</a>
+            <a href="consultant-requests.html">Booking Requests</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Load Schedule</h2>
+
+            <div>
+                <label for="consultant-id-input">Consultant ID:</label>
+                <input id="consultant-id-input" type="text" value="consultant-1">
+            </div>
+
+            <button id="load-schedule-button">Load Schedule</button>
+            <p id="schedule-message"></p>
+        </section>
+
+        <section class="panel">
+            <h2>Consultant Bookings</h2>
+
+            <table id="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Client ID</th>
+                        <th>Client Name</th>
+                        <th>Offering ID</th>
+                        <th>Service</th>
+                        <th>Slot ID</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Status</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-table-body">
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
+    <script src="js/consultant/consultant-schedule.js"></script>
+</body>
+</html>

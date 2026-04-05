@@ -1,10 +1,10 @@
 package backend.api.dto.request;
 
-public class ApproveConsultantRequest {
+public class RejectConsultantRequest {
 
     private String adminId;
 
-    public ApproveConsultantRequest() {
+    public RejectConsultantRequest() {
     }
 
     public String getAdminId() {

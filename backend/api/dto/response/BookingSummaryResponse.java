@@ -11,7 +11,7 @@ public class BookingSummaryResponse {
     private String startDateTime;
     private String endDateTime;
     private String bookingStatus;
-    private Double totalPrice;
+    private Double price;
 
     public BookingSummaryResponse() {
     }
@@ -26,7 +26,7 @@ public class BookingSummaryResponse {
             String startDateTime,
             String endDateTime,
             String bookingStatus,
-            Double totalPrice) {
+            Double price) {
         this.bookingId = bookingId;
         this.clientId = clientId;
         this.offeringId = offeringId;
@@ -36,7 +36,7 @@ public class BookingSummaryResponse {
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
         this.bookingStatus = bookingStatus;
-        this.totalPrice = totalPrice;
+        this.price = price;
     }
 
     public String getBookingId() {
@@ -111,11 +111,11 @@ public class BookingSummaryResponse {
         this.bookingStatus = bookingStatus;
     }
 
-    public Double getTotalPrice() {
-        return this.totalPrice;
+    public Double getPrice() {
+        return this.price;
     }
 
-    public void setTotalPrice(Double totalPrice) {
-        this.totalPrice = totalPrice;
+    public void setPrice(Double price) {
+        this.price = price;
     }
 }

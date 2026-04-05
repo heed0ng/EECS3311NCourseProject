@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Consultant Approvals</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Admin - Consultant Approvals</h1>
+        <nav>
+            <a href="admin-home.html">Admin Home</a>
+            <a href="admin-status.html">System Status</a>
+            <a href="admin-policies.html">Policies</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Pending Consultant Registrations</h2>
+
+            <div>
+                <label for="admin-id-input">Admin ID:</label>
+                <input id="admin-id-input" type="text" value="admin-1">
+            </div>
+
+            <button id="load-pending-consultants-button">Load Pending Consultants</button>
+            <p id="admin-consultant-message"></p>
+        </section>
+
+        <section class="panel">
+            <h2>Pending Consultants</h2>
+
+            <table id="pending-consultants-table">
+                <thead>
+                    <tr>
+                        <th>Consultant ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="pending-consultants-table-body">
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
+    <script src="js/admin/admin-consultants.js"></script>
+</body>
+</html>

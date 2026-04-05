@@ -331,7 +331,7 @@ public class TerminalUI {
         System.out.println("Removed saved payment method: " + savedMethodId);
     }
 
-    private void seedDemoDataIfNeeded() {
+    public void seedDemoDataIfNeeded() {
         seedDemoClientsIfMissing();
         seedDemoConsultantsIfMissing();
         seedDemoServicesIfMissing();
@@ -388,6 +388,14 @@ public class TerminalUI {
         if (offeringRepository.findById("offering-2").isEmpty()) {
             offeringRepository.save(new ConsultantServiceOffering("offering-2", consultant, service2, null, true));
         }
+        
+        if (offeringRepository.findById("offering-3").isEmpty()) {
+            offeringRepository.save(new ConsultantServiceOffering("offering-3", consultant, service3, null, true));
+        }
+        
+        if (offeringRepository.findById("offering-4").isEmpty()) {
+            offeringRepository.save(new ConsultantServiceOffering("offering-4", consultant, service4, null, true));
+        }
     }
 
     private void seedDemoSlotsIfMissing() {
@@ -403,9 +411,18 @@ public class TerminalUI {
         LocalDateTime slot3Start = LocalDateTime.now().plusDays(2).withHour(14).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime slot3End = LocalDateTime.now().plusDays(2).withHour(15).withMinute(0).withSecond(0).withNano(0);
 
+        LocalDateTime slot4Start = LocalDateTime.now().plusDays(3).withHour(16).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime slot4End = LocalDateTime.now().plusDays(3).withHour(17).withMinute(0).withSecond(0).withNano(0);
+
+        LocalDateTime slot5Start = LocalDateTime.now().plusDays(10).withHour(10).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime slot5End = LocalDateTime.now().plusDays(10).withHour(11).withMinute(0).withSecond(0).withNano(0);
+
+        
         if (slotRepository.findById("slot-1").isEmpty()) slotRepository.save(new AvailabilitySlot("slot-1", consultant, slot1Start, slot1End, true));
         if (slotRepository.findById("slot-2").isEmpty()) slotRepository.save(new AvailabilitySlot("slot-2", consultant, slot2Start, slot2End, true));
         if (slotRepository.findById("slot-3").isEmpty()) slotRepository.save(new AvailabilitySlot("slot-3", consultant, slot3Start, slot3End, true));
+        if (slotRepository.findById("slot-4").isEmpty()) slotRepository.save(new AvailabilitySlot("slot-4", consultant, slot4Start, slot4End, true));
+        if (slotRepository.findById("slot-5").isEmpty()) slotRepository.save(new AvailabilitySlot("slot-5", consultant, slot5Start, slot5End, true));
     }
 
     private void seedDemoPaymentMethodsIfMissing() {
@@ -415,7 +432,7 @@ public class TerminalUI {
         if (!hasAlicePaypal) paymentService.addSavedPaymentMethod("client-1", PaymentMethodType.PAYPAL, "Alice PayPal", "alice@example.com", "");
     }
 
-    private void subscribeDefaultObservers() {
+    public void subscribeDefaultObservers() {
         System.out.println("[Startup] Subscribing console demo observers from seeded persisted users.");
 
         consultantRepository.findById("consultant-1").ifPresent(consultant -> eventPublisher.subscribe(new ConsultantObserver("observer-consultant-" + consultant.getUserId(), consultant.getName())));
@@ -473,7 +490,7 @@ public class TerminalUI {
             return;
         }
         for (Booking booking : bookings) {
-            System.out.println(booking.getBookingId() + " | client=" + booking.getClient().getName() + " | consultant=" + booking.getOffering().getConsultant().getName() + " | service=" + booking.getOffering().getConsultingService().getName() + " | state=" + booking.getStateName() + " | price=$" + booking.getAgreedPrice());
+            System.out.println(booking.getBookingId() + " | client=" + booking.getClient().getName() + " | consultant=" + booking.getOffering().getConsultant().getName() + " | service=" + booking.getOffering().getConsultingService().getName() + " | state=" + booking.getStateName() + " | price=$" + booking.getPrice());
         }
     }
 

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client - Payments</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Client - Payments</h1>
+        <nav>
+            <a href="client-home.html">Client Home</a>
+            <a href="client-services.html">Browse Services</a>
+            <a href="client-bookings.html">My Bookings</a>
+            <a href="client-payment-methods.html">Payment Methods</a>
+            <a href="client-chatbot.html">AI Assistant</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Process Payment</h2>
+
+            <div>
+                <label for="client-id-input">Client ID:</label>
+                <input id="client-id-input" type="text" value="client-1">
+            </div>
+
+            <div>
+                <label for="booking-id-input">Booking ID:</label>
+                <input id="booking-id-input" type="text" placeholder="booking-1">
+            </div>
+
+            <div>
+                <label for="saved-payment-method-id-input">Saved Payment Method ID:</label>
+                <input id="saved-payment-method-id-input" type="text" placeholder="paymentmethod-1">
+            </div>
+
+            <button id="process-payment-button">Process Payment</button>
+            <p id="payment-message"></p>
+        </section>
+
+        <section class="panel">
+            <h2>Latest Payment Result</h2>
+
+            <table id="payment-result-table">
+                <thead>
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Booking ID</th>
+                        <th>Method Type</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Transaction Type</th>
+                        <th>Processed At</th>
+                    </tr>
+                </thead>
+                <tbody id="payment-result-table-body">
+                </tbody>
+            </table>
+        </section>
+
+        <section class="panel">
+            <h2>Payment History</h2>
+
+            <button id="load-payment-history-button">Load Payment History</button>
+
+            <table id="payment-history-table">
+                <thead>
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Booking ID</th>
+                        <th>Method Type</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Transaction Type</th>
+                        <th>Processed At</th>
+                    </tr>
+                </thead>
+                <tbody id="payment-history-table-body">
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
+    <script src="js/client/client-payments.js"></script>
+</body>
+</html>

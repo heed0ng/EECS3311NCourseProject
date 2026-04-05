@@ -19,6 +19,6 @@ public final class BookingDtoMapper {
                 booking.getSlot().getStartDateTime().toString(),
                 booking.getSlot().getEndDateTime().toString(),
                 booking.getStateName(),
-                booking.getAgreedPrice());
+                booking.getPrice());
     }
 }

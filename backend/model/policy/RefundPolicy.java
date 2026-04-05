@@ -24,6 +24,6 @@ public class RefundPolicy {
     public double calculateRefund(Booking booking, LocalDateTime now, CancellationPolicy cancellationPolicy) {
         LocalDateTime deadline = booking.getSlot().getStartDateTime().minusHours(cancellationPolicy.getCancellationDeadlineHours());
         double percent = (now.isBefore(deadline) || now.isEqual(deadline)) ? this.refundPercentBeforeDeadline : this.refundPercentAfterDeadline;
-        return booking.getAgreedPrice() * percent / 100.0;
+        return booking.getPrice() * percent / 100.0;
     }
 }

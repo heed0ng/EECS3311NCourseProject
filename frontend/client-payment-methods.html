@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client - Payment Methods</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Client - Payment Methods</h1>
+        <nav>
+            <a href="client-home.html">Client Home</a>
+            <a href="client-services.html">Browse Services</a>
+            <a href="client-bookings.html">My Bookings</a>
+            <a href="client-payments.html">Payments</a>
+            <a href="client-chatbot.html">AI Assistant</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Load Saved Payment Methods</h2>
+
+            <div>
+                <label for="client-id-input">Client ID:</label>
+                <input id="client-id-input" type="text" value="client-1">
+            </div>
+
+            <button id="load-payment-methods-button">Load Payment Methods</button>
+            <p id="payment-method-message"></p>
+        </section>
+
+        <section class="panel">
+            <h2>Saved Payment Methods</h2>
+
+            <table id="payment-methods-table">
+                <thead>
+                    <tr>
+                        <th>Saved Method ID</th>
+                        <th>Type</th>
+                        <th>Nickname</th>
+                        <th>Masked Display</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="payment-methods-table-body">
+                </tbody>
+            </table>
+        </section>
+
+        <section class="panel">
+            <h2>Add Saved Payment Method</h2>
+
+            <div>
+                <label for="payment-method-type-input">Payment Method Type:</label>
+                <select id="payment-method-type-input">
+                    <option value="CREDIT_CARD">CREDIT_CARD</option>
+                    <option value="DEBIT_CARD">DEBIT_CARD</option>
+                    <option value="PAYPAL">PAYPAL</option>
+                    <option value="BANK_TRANSFER">BANK_TRANSFER</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="nickname-input">Nickname:</label>
+                <input id="nickname-input" type="text" placeholder="Main card">
+            </div>
+
+            <div>
+                <label for="payment-details-input">Payment Details:</label>
+                <input id="payment-details-input" type="text" placeholder="Card number / PayPal email / account number">
+            </div>
+
+            <div>
+                <label for="payment-metadata-input">Payment Metadata:</label>
+                <input id="payment-metadata-input" type="text" placeholder="MM/YY|CVV or routing number">
+            </div>
+
+            <button id="add-payment-method-button">Add Payment Method</button>
+        </section>
+
+        <section class="panel">
+            <h2>Update Saved Payment Method</h2>
+
+            <div>
+                <label for="update-saved-method-id-input">Saved Method ID:</label>
+                <input id="update-saved-method-id-input" type="text" readonly>
+            </div>
+
+            <div>
+                <label for="update-payment-method-type-input">Payment Method Type:</label>
+                <input id="update-payment-method-type-input" type="text" readonly>
+            </div>
+
+            <div>
+                <label for="update-nickname-input">Nickname:</label>
+                <input id="update-nickname-input" type="text" placeholder="Updated nickname">
+            </div>
+
+            <div>
+                <label for="update-payment-details-input">Payment Details:</label>
+                <input id="update-payment-details-input" type="text" placeholder="New card number / email / account number">
+            </div>
+
+            <div>
+                <label for="update-payment-metadata-input">Payment Metadata:</label>
+                <input id="update-payment-metadata-input" type="text" placeholder="MM/YY|CVV or routing number">
+            </div>
+
+            <button id="update-payment-method-button">Update Payment Method</button>
+            <button id="clear-update-form-button" type="button">Clear Update Form</button>
+        </section>
+    </main>
+
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
+    <script src="js/client/client-payment-methods.js"></script>
+</body>
+</html>

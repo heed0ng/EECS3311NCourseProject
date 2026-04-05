@@ -67,7 +67,7 @@ public class SqliteBookingRepository implements BookingRepository {
             s.setString(5, booking.getStateName());
             s.setString(6, booking.getCreatedAt().toString());
             s.setString(7, booking.getLastUpdatedAt().toString());
-            s.setDouble(8, booking.getAgreedPrice());
+            s.setDouble(8, booking.getPrice());
             s.executeUpdate();
         } catch (Exception e) {
             throw new RuntimeException("Failed to save booking.", e);

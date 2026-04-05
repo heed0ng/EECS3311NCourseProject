@@ -157,7 +157,7 @@ public class DefaultConsultantService implements ConsultantService {
 
         String transactionId = idGenerator.nextId("payment_transactions", "transaction_id", "transaction");
         PaymentTransaction pendingTransaction = new PaymentTransaction(transactionId, booking, booking.getClient(), PaymentTransactionType.PAYMENT,
-                PaymentTransactionStatus.PENDING, PaymentMethodType.NONE_SELECTED, booking.getAgreedPrice(), LocalDateTime.now());
+                PaymentTransactionStatus.PENDING, PaymentMethodType.NONE_SELECTED, booking.getPrice(), LocalDateTime.now());
         this.paymentTransactionRepository.save(pendingTransaction);
     }
 }

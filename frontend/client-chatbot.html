@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client - AI Assistant</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Client - AI Assistant</h1>
+        <nav>
+            <a href="client-home.html">Client Home</a>
+            <a href="client-services.html">Browse Services</a>
+            <a href="client-bookings.html">My Bookings</a>
+            <a href="client-payment-methods.html">Payment Methods</a>
+            <a href="client-payments.html">Payments</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Ask a Platform Question</h2>
+
+            <p>
+                This assistant currently answers general platform questions only.
+                It does not access private client booking or payment details.
+            </p>
+
+            <div>
+                <label for="assistant-question-input">Question:</label>
+            </div>
+            <div>
+                <textarea id="assistant-question-input" rows="6" cols="80"
+                    placeholder="Example: How do I book a consulting session?"></textarea>
+            </div>
+
+            <button id="ask-assistant-button">Ask Assistant</button>
+            <p id="assistant-message"></p>
+        </section>
+
+        <section class="panel">
+            <h2>Assistant Answer</h2>
+            <pre id="assistant-answer-output"></pre>
+        </section>
+
+        <section class="panel">
+            <h2>Example Questions</h2>
+            <ul>
+                <li>How do I book a consulting session?</li>
+                <li>What payment methods are accepted?</li>
+                <li>What services are available?</li>
+                <li>Can I cancel my booking?</li>
+            </ul>
+        </section>
+    </main>
+
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
+    <script src="js/client/client-chatbot.js"></script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Policies</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Admin - Policies</h1>
+        <nav>
+            <a href="admin-home.html">Admin Home</a>
+            <a href="admin-consultants.html">Consultant Approvals</a>
+            <a href="admin-status.html">System Status</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Admin Context</h2>
+
+            <div>
+                <label for="admin-id-input">Admin ID:</label>
+                <input id="admin-id-input" type="text" value="admin-1">
+            </div>
+
+            <button id="load-policy-summary-button">Load Policy Summary</button>
+            <p id="admin-policy-message"></p>
+        </section>
+
+        <section class="panel">
+            <h2>Current Policy Summary</h2>
+            <table>
+                <tbody>
+                    <tr>
+                        <th>Cancellation</th>
+                        <td id="cancellation-policy-summary"></td>
+                    </tr>
+                    <tr>
+                        <th>Pricing</th>
+                        <td id="pricing-policy-summary"></td>
+                    </tr>
+                    <tr>
+                        <th>Notifications</th>
+                        <td id="notification-policy-summary"></td>
+                    </tr>
+                    <tr>
+                        <th>Refund</th>
+                        <td id="refund-policy-summary"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="panel">
+            <h2>Update Cancellation Policy</h2>
+            <div>
+                <label for="cancellation-deadline-hours-input">Cancellation Deadline Hours:</label>
+                <input id="cancellation-deadline-hours-input" type="number" min="0" step="1">
+            </div>
+            <button id="update-cancellation-policy-button">Update Cancellation Policy</button>
+        </section>
+
+        <section class="panel">
+            <h2>Update Refund Policy</h2>
+            <div>
+                <label for="refund-before-deadline-input">Refund Before Deadline (%):</label>
+                <input id="refund-before-deadline-input" type="number" min="0" max="100" step="0.01">
+            </div>
+            <div>
+                <label for="refund-after-deadline-input">Refund After Deadline (%):</label>
+                <input id="refund-after-deadline-input" type="number" min="0" max="100" step="0.01">
+            </div>
+            <button id="update-refund-policy-button">Update Refund Policy</button>
+        </section>
+
+        <section class="panel">
+            <h2>Update Pricing Policy</h2>
+            <div>
+                <label>
+                    <input id="allow-consultant-custom-price-input" type="checkbox">
+                    Allow consultant custom price
+                </label>
+            </div>
+            <button id="update-pricing-policy-button">Update Pricing Policy</button>
+        </section>
+
+        <section class="panel">
+            <h2>Update Notification Policy</h2>
+            <div><label><input id="notify-on-booking-requested-input" type="checkbox"> Notify on booking requested</label></div>
+            <div><label><input id="notify-on-booking-accepted-input" type="checkbox"> Notify on booking accepted</label></div>
+            <div><label><input id="notify-on-booking-rejected-input" type="checkbox"> Notify on booking rejected</label></div>
+            <div><label><input id="notify-on-payment-processed-input" type="checkbox"> Notify on payment processed</label></div>
+            <div><label><input id="notify-on-booking-cancelled-input" type="checkbox"> Notify on booking cancelled</label></div>
+            <div><label><input id="notify-on-consultant-approval-decision-input" type="checkbox"> Notify on consultant approval decision</label></div>
+            <button id="update-notification-policy-button">Update Notification Policy</button>
+        </section>
+    </main>
+
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
+    <script src="js/admin/admin-policies.js"></script>
+</body>
+</html>

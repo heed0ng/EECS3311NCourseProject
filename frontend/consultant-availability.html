@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultant - Availability</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Consultant - Manage Availability</h1>
+        <nav>
+            <a href="consultant-home.html">Consultant Home</a>
+            <a href="consultant-requests.html">Booking Requests</a>
+            <a href="consultant-schedule.html">Schedule</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Load Availability Slots</h2>
+
+            <div>
+                <label for="consultant-id-input">Consultant ID:</label>
+                <input id="consultant-id-input" type="text" value="consultant-1">
+            </div>
+
+            <button id="load-availability-button">Load Availability</button>
+            <p id="availability-message"></p>
+        </section>
+
+        <section class="panel">
+            <h2>Current Availability Slots</h2>
+
+            <table id="availability-table">
+                <thead>
+                    <tr>
+                        <th>Slot ID</th>
+                        <th>Consultant ID</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="availability-table-body">
+                </tbody>
+            </table>
+        </section>
+
+        <section class="panel">
+            <h2>Add Availability Slot</h2>
+
+            <div>
+                <label for="start-datetime-input">Start Date Time:</label>
+                <input id="start-datetime-input" type="datetime-local">
+            </div>
+
+            <div>
+                <label for="end-datetime-input">End Date Time:</label>
+                <input id="end-datetime-input" type="datetime-local">
+            </div>
+
+            <button id="add-availability-button">Add Availability Slot</button>
+        </section>
+    </main>
+
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
+    <script src="js/consultant/consultant-availability.js"></script>
+</body>
+</html>
