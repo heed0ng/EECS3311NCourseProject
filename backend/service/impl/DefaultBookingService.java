@@ -74,23 +74,59 @@ public class DefaultBookingService implements BookingService {
     @Override
     public Booking cancelBooking(String clientId, String bookingId) {
         Booking booking = this.bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException("Booking not found."));
+
         if (!booking.belongsToClient(clientId)) throw new BusinessRuleViolationException("Booking does not belong to the client.");
+
         LocalDateTime now = LocalDateTime.now();
         var cancellationPolicy = this.policyRepository.getCancellationPolicy();
         var refundPolicy = this.policyRepository.getRefundPolicy();
+
         if (!cancellationPolicy.canCancel(booking, now)) throw new BusinessRuleViolationException("Cancellation deadline has passed.");
-        double refundAmount = refundPolicy.calculateRefund(booking, now, cancellationPolicy);
+
+        List<PaymentTransaction> bookingTransactions = this.paymentTransactionRepository.findByBooking(bookingId);
+
+        PaymentTransaction successfulPaymentTransaction = findSuccessfulPaymentTransaction(bookingTransactions);
+        PaymentTransaction pendingPaymentTransaction = findPendingPaymentTransaction(bookingTransactions);
+
+        double refundAmount = 0.0;
+
+        if (successfulPaymentTransaction != null) refundAmount = refundPolicy.calculateRefund(booking, now, cancellationPolicy);
+        
         booking.cancel();
         this.bookingRepository.save(booking);
         booking.getSlot().setAvailable(true);
         this.availabilitySlotRepository.save(booking.getSlot());
-        if (refundAmount > 0.0) {
-        	String transactionId = idGenerator.nextId("payment_transactions", "transaction_id", "transaction");
-            PaymentTransaction refund = new PaymentTransaction(transactionId, booking, booking.getClient(), PaymentTransactionType.REFUND, PaymentTransactionStatus.SUCCESS, PaymentMethodType.BANK_TRANSFER, refundAmount, now);
-            this.paymentTransactionRepository.save(refund);
+
+        if (successfulPaymentTransaction != null && refundAmount > 0.0) {
+            String transactionId = idGenerator.nextId("payment_transactions", "transaction_id", "transaction");
+
+            PaymentTransaction refundTransaction = new PaymentTransaction(transactionId, booking, booking.getClient(),
+                    PaymentTransactionType.REFUND, PaymentTransactionStatus.SUCCESS, PaymentMethodType.BANK_TRANSFER, refundAmount, now);
+
+            this.paymentTransactionRepository.save(refundTransaction);
+            
+        } else if (successfulPaymentTransaction == null && pendingPaymentTransaction != null) {
+            PaymentTransaction failedPendingPaymentTransaction = new PaymentTransaction(pendingPaymentTransaction.getTransactionId(),
+                    booking, booking.getClient(),  PaymentTransactionType.PAYMENT, PaymentTransactionStatus.FAILED,
+                    pendingPaymentTransaction.getMethodType(),  pendingPaymentTransaction.getAmount(), pendingPaymentTransaction.getCreatedAt());
+
+            this.paymentTransactionRepository.save(failedPendingPaymentTransaction);
         }
+
         this.publishCancelled(booking, refundAmount);
         return booking;
+    }
+    
+    private PaymentTransaction findSuccessfulPaymentTransaction(List<PaymentTransaction> transactions) {
+        return transactions.stream().filter(transaction ->
+                        transaction.getTransactionType() == PaymentTransactionType.PAYMENT
+                                && transaction.getStatus() == PaymentTransactionStatus.SUCCESS).findFirst().orElse(null);
+    }
+
+    private PaymentTransaction findPendingPaymentTransaction(List<PaymentTransaction> transactions) {
+        return transactions.stream().filter(transaction ->
+                        transaction.getTransactionType() == PaymentTransactionType.PAYMENT
+                                && transaction.getStatus() == PaymentTransactionStatus.PENDING).findFirst().orElse(null);
     }
 
     @Override
