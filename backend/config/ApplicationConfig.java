@@ -13,6 +13,9 @@ import backend.repository.*;
 import backend.repository.sqlite.*;
 import backend.service.*;
 import backend.service.impl.*;
+
+import backend.ai.GroqChatClient;
+
 @Configuration
 public class ApplicationConfig {
 
@@ -173,11 +176,13 @@ public class ApplicationConfig {
     @Bean
     public ClientAssistantService clientAssistantService(
             BookingService bookingService,
-            PolicyRepository policyRepository) {
+            PolicyRepository policyRepository,
+            GroqChatClient groqChatClient) {
 
         return new DefaultClientAssistantService(
                 bookingService,
-                policyRepository);
+                policyRepository,
+                groqChatClient);
     }
     
     @Bean
@@ -206,6 +211,13 @@ public class ApplicationConfig {
                         currentAdmin.getName()));
             }
         };
+    }
+    
+    @Bean
+    public GroqChatClient groqChatClient() {
+        String apiKey = System.getenv("GROQ_API_KEY");
+        String model = System.getenv("GROQ_MODEL");
+        return new GroqChatClient(apiKey, model);
     }
     
 }

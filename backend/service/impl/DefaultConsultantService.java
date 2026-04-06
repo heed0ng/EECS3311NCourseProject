@@ -48,6 +48,7 @@ public class DefaultConsultantService implements ConsultantService {
         if (!consultant.isApproved()) throw new AuthorizationException("Consultant is not approved.");
         if (!startDateTime.isBefore(endDateTime)) throw new BusinessRuleViolationException("Slot start time must be before end time.");
 
+        if (!startDateTime.isAfter(LocalDateTime.now())) throw new BusinessRuleViolationException("Availability slot start time must be after than right now.");
         for (AvailabilitySlot slot : this.slotRepository.findByConsultant(consultantId)) {
             if (this.blocksAvailabilityOverlap(slot) && slot.overlaps(startDateTime, endDateTime)) throw new BusinessRuleViolationException("Overlapping slot detected.");
         }
@@ -73,43 +74,22 @@ public class DefaultConsultantService implements ConsultantService {
     }
 
     @Override
-    public AvailabilitySlot updateAvailabilitySlot(
-            String consultantId,
-            String slotId,
-            LocalDateTime startDateTime,
-            LocalDateTime endDateTime) {
+    public AvailabilitySlot updateAvailabilitySlot(String consultantId, String slotId, LocalDateTime startDateTime, LocalDateTime endDateTime) {
 
-        AvailabilitySlot slot = this.slotRepository.findById(slotId)
-                .orElseThrow(() -> new EntityNotFoundException("Availability slot not found."));
+        AvailabilitySlot slot = this.slotRepository.findById(slotId).orElseThrow(() -> new EntityNotFoundException("Availability slot not found."));
 
-        if (!slot.isOwnedBy(consultantId)) {
-            throw new AuthorizationException("Availability slot does not belong to the consultant.");
-        }
-
-        if (!slot.isAvailable()) {
-            throw new BusinessRuleViolationException("Only currently available slots can be updated.");
-        }
-
-        if (this.bookingRepository.hasNonTerminalBookingForSlot(slotId)) {
-            throw new BusinessRuleViolationException(
-                    "Availability slot cannot be updated because it is tied to an active booking.");
-        }
-
-        if (!startDateTime.isBefore(endDateTime)) {
-            throw new BusinessRuleViolationException("Slot start time must be before end time.");
-        }
-
+        if (!slot.isOwnedBy(consultantId)) throw new AuthorizationException("Availability slot does not belong to the consultant.");
+        if (!slot.isAvailable()) throw new BusinessRuleViolationException("Only currently available slots can be updated.");
+        if (this.bookingRepository.hasNonTerminalBookingForSlot(slotId)) throw new BusinessRuleViolationException("Availability slot cannot be updated because it is tied to an active booking.");
+        if (!startDateTime.isBefore(endDateTime))  throw new BusinessRuleViolationException("Slot start time must be before end time.");
         for (AvailabilitySlot otherSlot : this.slotRepository.findByConsultant(consultantId)) {
-            if (otherSlot.getSlotId().equals(slotId)) {
-                continue;
-            }
-
-            if (this.blocksAvailabilityOverlap(otherSlot)
-                    && otherSlot.overlaps(startDateTime, endDateTime)) {
+            if (otherSlot.getSlotId().equals(slotId)) continue;
+            if (this.blocksAvailabilityOverlap(otherSlot) && otherSlot.overlaps(startDateTime, endDateTime)) {
                 throw new BusinessRuleViolationException("Updated slot would overlap with another active slot.");
             }
         }
-
+        if (!startDateTime.isAfter(LocalDateTime.now())) throw new BusinessRuleViolationException("Availability slot start time must be after than right now.");
+       
         slot.setStartDateTime(startDateTime);
         slot.setEndDateTime(endDateTime);
         this.slotRepository.save(slot);

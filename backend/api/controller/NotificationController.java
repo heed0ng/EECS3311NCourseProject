@@ -103,7 +103,7 @@ private boolean supportsAudience(String audience, DomainEvent event) {
     switch (audience) {
         case "client": return "BookingAccepted".equals(eventType) || "BookingRejected".equals(eventType)
                     || "BookingCancelled".equals(eventType) || "PaymentProcessed".equals(eventType)
-                    || "BookingRequested".equals(eventType) || "PolicyUpdated".equals(eventType);
+                    || "BookingRequested".equals(eventType);
 
         case "consultant": return "BookingRequested".equals(eventType) || "BookingCancelled".equals(eventType)
                     || "PaymentProcessed".equals(eventType) || "PolicyUpdated".equals(eventType);
