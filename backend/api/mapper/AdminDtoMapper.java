@@ -11,34 +11,22 @@ public final class AdminDtoMapper {
     private AdminDtoMapper() {
     }
 
-    public static PolicySummaryResponse toPolicySummaryResponse(
-            CancellationPolicy cancellationPolicy,
-            CustomPricingPolicy pricingPolicy,
-            NotificationPolicy notificationPolicy,
-            RefundPolicy refundPolicy) {
+    public static PolicySummaryResponse toPolicySummaryResponse(CancellationPolicy cancellationPolicy, CustomPricingPolicy pricingPolicy,
+        NotificationPolicy notificationPolicy, RefundPolicy refundPolicy) {
 
-        String cancellationSummary =
-                "Cancellation deadline hours: " + cancellationPolicy.getCancellationDeadlineHours();
+    String cancellationSummary = "Cancellation deadline hours: " + cancellationPolicy.getCancellationDeadlineHours();
 
-        String pricingSummary =
-                "Allow consultant custom price: " + pricingPolicy.isAllowConsultantCustomPrice();
+    String pricingSummary = "Allow consultant custom price: " + pricingPolicy.isAllowConsultantCustomPrice();
 
-        String notificationSummary =
-                "notifyOnBookingRequested=" + notificationPolicy.isNotifyOnBookingRequested()
-                + ", notifyOnBookingAccepted=" + notificationPolicy.isNotifyOnBookingAccepted()
-                + ", notifyOnBookingRejected=" + notificationPolicy.isNotifyOnBookingRejected()
-                + ", notifyOnPaymentProcessed=" + notificationPolicy.isNotifyOnPaymentProcessed()
-                + ", notifyOnBookingCancelled=" + notificationPolicy.isNotifyOnBookingCancelled()
-                + ", notifyOnConsultantApprovalDecision=" + notificationPolicy.isNotifyOnConsultantApprovalDecision();
+    String notificationSummary = "notifyOnBookingRequested=" + notificationPolicy.isNotifyOnBookingRequested()
+            + ", notifyOnBookingAccepted=" + notificationPolicy.isNotifyOnBookingAccepted()
+            + ", notifyOnBookingRejected=" + notificationPolicy.isNotifyOnBookingRejected()
+            + ", notifyOnPaymentProcessed=" + notificationPolicy.isNotifyOnPaymentProcessed()
+            + ", notifyOnBookingCancelled=" + notificationPolicy.isNotifyOnBookingCancelled()
+            + ", notifyOnConsultantApprovalDecision=" + notificationPolicy.isNotifyOnConsultantApprovalDecision();
 
-        String refundSummary =
-                "Refund before deadline: " + refundPolicy.getRefundPercentBeforeDeadline()
-                + "%, refund after deadline: " + refundPolicy.getRefundPercentAfterDeadline() + "%";
+    String refundSummary = "Refund rate for eligible cancellations: " + refundPolicy.getRefundPercentBeforeDeadline() + "%";
 
-        return new PolicySummaryResponse(
-                cancellationSummary,
-                pricingSummary,
-                notificationSummary,
-                refundSummary);
-    }
+    return new PolicySummaryResponse(cancellationSummary, pricingSummary, notificationSummary, refundSummary);
+	}
 }

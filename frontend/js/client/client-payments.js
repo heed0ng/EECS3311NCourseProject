@@ -7,13 +7,45 @@ function registerEventHandlers() {
         await processPayment();
     });
 
+    document.getElementById("load-payment-inputs-button").addEventListener("click", async function () {
+        await loadPaymentInputs();
+    });
+
     document.getElementById("load-payment-history-button").addEventListener("click", async function () {
         await loadPaymentHistory();
     });
 }
 
+async function loadPaymentInputs() {
+    const clientId = getClientId();
+
+    if (!clientId) {
+        setText("payment-message", "Client ID is required.");
+        return;
+    }
+
+    try {
+        const bookings = await apiGet("/api/client/" + encodeURIComponent(clientId) + "/bookings");
+        const pendingPaymentBookings = bookings.filter(function (booking) {
+            return booking.bookingStatus === "Pending Payment";
+        });
+        renderPendingPaymentBookings(pendingPaymentBookings);
+
+        const savedPaymentMethods = await apiGet(
+            "/api/client/" + encodeURIComponent(clientId) + "/payment-methods"
+        );
+        renderPaymentMethodSelectionTable(savedPaymentMethods);
+
+        setText("payment-message", "Pending payment bookings and saved payment methods loaded successfully.");
+    } catch (error) {
+        clearPendingPaymentBookings();
+        clearPaymentMethodSelectionTable();
+        setText("payment-message", "Failed to load payment inputs: " + error.message);
+    }
+}
+
 async function processPayment() {
-    const clientId = document.getElementById("client-id-input").value.trim();
+    const clientId = getClientId();
     const bookingId = document.getElementById("booking-id-input").value.trim();
     const savedPaymentMethodId = document.getElementById("saved-payment-method-id-input").value.trim();
 
@@ -37,6 +69,7 @@ async function processPayment() {
 
         renderLatestPaymentResult(paymentResult);
         setText("payment-message", paymentResult.message || "Payment processed successfully.");
+        await loadPaymentInputs();
         await loadPaymentHistory();
     } catch (error) {
         clearLatestPaymentResult();
@@ -45,7 +78,7 @@ async function processPayment() {
 }
 
 async function loadPaymentHistory() {
-    const clientId = document.getElementById("client-id-input").value.trim();
+    const clientId = getClientId();
 
     if (!clientId) {
         setText("payment-message", "Client ID is required.");
@@ -53,14 +86,63 @@ async function loadPaymentHistory() {
     }
 
     try {
-        const paymentHistory =
-            await apiGet("/api/client/" + encodeURIComponent(clientId) + "/payments");
-
+        const paymentHistory = await apiGet("/api/client/" + encodeURIComponent(clientId) + "/payments");
         renderPaymentHistory(paymentHistory);
         setText("payment-message", "Payment history loaded successfully.");
     } catch (error) {
         clearPaymentHistory();
         setText("payment-message", "Failed to load payment history: " + error.message);
+    }
+}
+
+function renderPendingPaymentBookings(bookings) {
+    const tableBodyElement = document.getElementById("pending-payment-bookings-table-body");
+    clearElementChildren(tableBodyElement);
+
+    for (const currentBooking of bookings) {
+        const rowElement = document.createElement("tr");
+        rowElement.appendChild(createCell(currentBooking.bookingId));
+        rowElement.appendChild(createCell(currentBooking.serviceName));
+        rowElement.appendChild(createCell(currentBooking.consultantName));
+        rowElement.appendChild(createCell(currentBooking.startDateTime));
+        rowElement.appendChild(createCell(currentBooking.endDateTime));
+        rowElement.appendChild(createCell(currentBooking.bookingStatus));
+        rowElement.appendChild(createCell(String(currentBooking.price)));
+
+        const actionCell = document.createElement("td");
+        const selectButton = document.createElement("button");
+        selectButton.textContent = "Select";
+        selectButton.addEventListener("click", function () {
+            document.getElementById("booking-id-input").value = currentBooking.bookingId;
+        });
+        actionCell.appendChild(selectButton);
+        rowElement.appendChild(actionCell);
+
+        tableBodyElement.appendChild(rowElement);
+    }
+}
+
+function renderPaymentMethodSelectionTable(savedPaymentMethods) {
+    const tableBodyElement = document.getElementById("payment-method-selection-table-body");
+    clearElementChildren(tableBodyElement);
+
+    for (const currentMethod of savedPaymentMethods) {
+        const rowElement = document.createElement("tr");
+        rowElement.appendChild(createCell(currentMethod.savedPaymentMethodId));
+        rowElement.appendChild(createCell(currentMethod.paymentMethodType));
+        rowElement.appendChild(createCell(currentMethod.nickname));
+        rowElement.appendChild(createCell(currentMethod.maskedDisplayValue));
+
+        const actionCell = document.createElement("td");
+        const selectButton = document.createElement("button");
+        selectButton.textContent = "Select";
+        selectButton.addEventListener("click", function () {
+            document.getElementById("saved-payment-method-id-input").value = currentMethod.savedPaymentMethodId;
+        });
+        actionCell.appendChild(selectButton);
+        rowElement.appendChild(actionCell);
+
+        tableBodyElement.appendChild(rowElement);
     }
 }
 
@@ -99,14 +181,24 @@ function renderPaymentHistory(paymentHistory) {
     }
 }
 
+function clearPendingPaymentBookings() {
+    clearElementChildren(document.getElementById("pending-payment-bookings-table-body"));
+}
+
+function clearPaymentMethodSelectionTable() {
+    clearElementChildren(document.getElementById("payment-method-selection-table-body"));
+}
+
 function clearLatestPaymentResult() {
-    const tableBodyElement = document.getElementById("payment-result-table-body");
-    clearElementChildren(tableBodyElement);
+    clearElementChildren(document.getElementById("payment-result-table-body"));
 }
 
 function clearPaymentHistory() {
-    const tableBodyElement = document.getElementById("payment-history-table-body");
-    clearElementChildren(tableBodyElement);
+    clearElementChildren(document.getElementById("payment-history-table-body"));
+}
+
+function getClientId() {
+    return document.getElementById("client-id-input").value.trim();
 }
 
 function createCell(text) {

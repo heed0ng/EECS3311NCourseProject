@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import backend.api.dto.request.CreateAvailabilitySlotRequest;
+import backend.api.dto.request.UpdateAvailabilitySlotRequest;
 import backend.api.dto.response.ActionResultResponse;
 import backend.api.dto.response.AvailabilitySlotResponse;
 import backend.api.mapper.AvailabilitySlotDtoMapper;
@@ -25,29 +26,28 @@ public class ConsultantAvailabilityController {
         this.consultantService = consultantService;
     }
 
-    @GetMapping("/{consultantId}/availability")
-    public ResponseEntity<List<AvailabilitySlotResponse>> getAvailabilitySlots(
-            @PathVariable String consultantId) {
+@GetMapping("/{consultantId}/availability")
+public ResponseEntity<?> getAvailabilitySlots(@PathVariable String consultantId) {
+    List<AvailabilitySlotResponse> responses = new ArrayList<>();
 
-        List<AvailabilitySlotResponse> responses = new ArrayList<>();
+    try {
+        List<AvailabilitySlot> availabilitySlots =
+                this.consultantService.getAvailabilitySlots(consultantId);
 
-        try {
-            List<AvailabilitySlot> availabilitySlots =
-                    this.consultantService.getAvailabilitySlots(consultantId);
-
-            for (AvailabilitySlot currentSlot : availabilitySlots) {
-                responses.add(
-                        AvailabilitySlotDtoMapper.toAvailabilitySlotResponse(
-                                currentSlot,
-                                ""));
-            }
-
-            return ResponseEntity.ok(responses);
-
-        } catch (Exception exception) {
-            return ResponseEntity.badRequest().body(responses);
+        for (AvailabilitySlot currentSlot : availabilitySlots) {
+            responses.add(
+                    AvailabilitySlotDtoMapper.toAvailabilitySlotResponse(
+                            currentSlot,
+                            ""));
         }
+
+        return ResponseEntity.ok(responses);
+
+    } catch (Exception exception) {
+        return ResponseEntity.badRequest().body(
+                new ActionResultResponse(false, exception.getMessage()));
     }
+}
 
     @PostMapping("/{consultantId}/availability")
     public ResponseEntity<?> createAvailabilitySlot(
@@ -76,4 +76,50 @@ public class ConsultantAvailabilityController {
                     new ActionResultResponse(false, exception.getMessage()));
         }
     }
+    
+    @DeleteMapping("/{consultantId}/availability/{slotId}")
+    public ResponseEntity<?> removeAvailabilitySlot(
+            @PathVariable String consultantId,
+            @PathVariable String slotId) {
+
+        try {
+            this.consultantService.removeAvailabilitySlot(consultantId, slotId);
+
+            return ResponseEntity.ok(new ActionResultResponse(true, "Availability slot removed from active availability successfully."));
+
+        } catch (Exception exception) {
+            return ResponseEntity.badRequest().body(new ActionResultResponse(false, exception.getMessage()));
+        }
+    }
+    
+    @PutMapping("/{consultantId}/availability/{slotId}")
+    public ResponseEntity<?> updateAvailabilitySlot(
+            @PathVariable String consultantId,
+            @PathVariable String slotId,
+            @RequestBody UpdateAvailabilitySlotRequest updateAvailabilitySlotRequest) {
+
+        try {
+            LocalDateTime startDateTime =
+                    LocalDateTime.parse(updateAvailabilitySlotRequest.getStartDateTime());
+
+            LocalDateTime endDateTime =
+                    LocalDateTime.parse(updateAvailabilitySlotRequest.getEndDateTime());
+
+            AvailabilitySlot updatedSlot = this.consultantService.updateAvailabilitySlot(
+                    consultantId,
+                    slotId,
+                    startDateTime,
+                    endDateTime);
+
+            AvailabilitySlotResponse response =
+                    AvailabilitySlotDtoMapper.toAvailabilitySlotResponse(updatedSlot, "");
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception exception) {
+            return ResponseEntity.badRequest().body(
+                    new ActionResultResponse(false, exception.getMessage()));
+        }
+    }
+    
 }

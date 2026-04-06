@@ -25,7 +25,7 @@ public class AdminConsultantController {
     }
 
     @GetMapping("/consultants/pending")
-    public ResponseEntity<List<PendingConsultantResponse>> getPendingConsultants() {
+    public ResponseEntity<?> getPendingConsultants() {
         List<PendingConsultantResponse> responses = new ArrayList<>();
 
         try {
@@ -38,7 +38,8 @@ public class AdminConsultantController {
             return ResponseEntity.ok(responses);
 
         } catch (Exception exception) {
-            return ResponseEntity.badRequest().body(responses);
+            return ResponseEntity.badRequest().body(
+                    new ActionResultResponse(false, exception.getMessage()));
         }
     }
 

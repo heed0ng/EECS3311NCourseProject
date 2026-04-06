@@ -9,6 +9,7 @@ public class OfferingSummaryResponse {
     private Integer durationMinutes;
     private Double basePrice;
     private String description;
+    private String status;
 
     public OfferingSummaryResponse() {
     }
@@ -20,7 +21,8 @@ public class OfferingSummaryResponse {
             String consultantName,
             Integer durationMinutes,
             Double basePrice,
-            String description) {
+            String description,
+            String status) {
         this.offeringId = offeringId;
         this.serviceName = serviceName;
         this.consultantId = consultantId;
@@ -28,6 +30,7 @@ public class OfferingSummaryResponse {
         this.durationMinutes = durationMinutes;
         this.basePrice = basePrice;
         this.description = description;
+        this.status = status;
     }
 
     public String getOfferingId() {
@@ -84,5 +87,13 @@ public class OfferingSummaryResponse {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

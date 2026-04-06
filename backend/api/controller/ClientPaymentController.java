@@ -24,29 +24,28 @@ public class ClientPaymentController {
         this.paymentService = paymentService;
     }
 
-    @GetMapping("/{clientId}/payments")
-    public ResponseEntity<List<PaymentTransactionResponse>> getPaymentHistory(
-            @PathVariable String clientId) {
+@GetMapping("/{clientId}/payments")
+public ResponseEntity<?> getPaymentHistory(@PathVariable String clientId) {
+    List<PaymentTransactionResponse> responses = new ArrayList<>();
 
-        List<PaymentTransactionResponse> responses = new ArrayList<>();
+    try {
+        List<PaymentTransaction> paymentTransactions =
+                this.paymentService.getPaymentHistory(clientId);
 
-        try {
-            List<PaymentTransaction> paymentTransactions =
-                    this.paymentService.getPaymentHistory(clientId);
-
-            for (PaymentTransaction currentPaymentTransaction : paymentTransactions) {
-                responses.add(
-                        PaymentDtoMapper.toPaymentTransactionResponse(
-                                currentPaymentTransaction,
-                                ""));
-            }
-
-            return ResponseEntity.ok(responses);
-
-        } catch (Exception exception) {
-            return ResponseEntity.badRequest().body(responses);
+        for (PaymentTransaction currentPaymentTransaction : paymentTransactions) {
+            responses.add(
+                    PaymentDtoMapper.toPaymentTransactionResponse(
+                            currentPaymentTransaction,
+                            ""));
         }
+
+        return ResponseEntity.ok(responses);
+
+    } catch (Exception exception) {
+        return ResponseEntity.badRequest().body(
+                new ActionResultResponse(false, exception.getMessage()));
     }
+}
 
     @PostMapping("/{clientId}/payments")
     public ResponseEntity<?> processPayment(

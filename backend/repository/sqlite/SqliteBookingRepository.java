@@ -57,6 +57,27 @@ public class SqliteBookingRepository implements BookingRepository {
     }
 
     @Override
+    public boolean hasNonTerminalBookingForSlot(String slotId) {
+        String sql =
+                "SELECT COUNT(*) " +
+                "FROM bookings " +
+                "WHERE slot_id = ? " +
+                "AND state_name IN ('Requested', 'Confirmed', 'Pending Payment', 'Paid')";
+
+        try (Connection c = databaseManager.getConnection();
+             PreparedStatement s = c.prepareStatement(sql)) {
+
+            s.setString(1, slotId);
+
+            try (ResultSet rs = s.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to check slot booking usage.", e);
+        }
+    }
+    
+    @Override
     public void save(Booking booking) {
         String sql = "INSERT INTO bookings(booking_id, client_id, offering_id, slot_id, state_name, created_at, last_updated_at, agreed_price) VALUES(?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(booking_id) DO UPDATE SET client_id=excluded.client_id, offering_id=excluded.offering_id, slot_id=excluded.slot_id, state_name=excluded.state_name, created_at=excluded.created_at, last_updated_at=excluded.last_updated_at, agreed_price=excluded.agreed_price";
         try (Connection c = databaseManager.getConnection(); PreparedStatement s = c.prepareStatement(sql)) {

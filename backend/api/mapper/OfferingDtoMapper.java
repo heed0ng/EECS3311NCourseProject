@@ -16,6 +16,7 @@ public final class OfferingDtoMapper {
                 offering.getConsultant().getName(),
                 offering.getDurationMinutes(),
                 offering.getEffectivePrice(),
-                offering.getConsultingService().getDescription());
+                offering.getConsultingService().getDescription(),
+                offering.isActive() ? "ACTIVE" : "INACTIVE");
     }
 }

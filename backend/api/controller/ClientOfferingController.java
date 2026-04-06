@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import backend.api.dto.response.ActionResultResponse;
 import backend.api.dto.response.AvailabilitySlotResponse;
 import backend.api.dto.response.OfferingSummaryResponse;
 import backend.api.mapper.AvailabilitySlotDtoMapper;
@@ -25,8 +26,9 @@ public class ClientOfferingController {
         this.bookingService = bookingService;
     }
 
-    @GetMapping("/offerings")
-    public ResponseEntity<List<OfferingSummaryResponse>> getAvailableOfferings() {
+@GetMapping("/offerings")
+public ResponseEntity<?> getAvailableOfferings() {
+    try {
         List<ConsultantServiceOffering> offerings = this.bookingService.browseAvailableOfferings();
         List<OfferingSummaryResponse> responses = new ArrayList<>();
 
@@ -35,12 +37,16 @@ public class ClientOfferingController {
         }
 
         return ResponseEntity.ok(responses);
+
+    } catch (Exception exception) {
+        return ResponseEntity.badRequest().body(
+                new ActionResultResponse(false, exception.getMessage()));
     }
+}
 
-    @GetMapping("/offerings/{offeringId}/slots")
-    public ResponseEntity<List<AvailabilitySlotResponse>> getAvailableSlotsByOfferingId(
-            @PathVariable String offeringId) {
-
+@GetMapping("/offerings/{offeringId}/slots")
+public ResponseEntity<?> getAvailableSlotsByOfferingId(@PathVariable String offeringId) {
+    try {
         List<AvailabilitySlot> allAvailableSlots = this.bookingService.getAllAvailableSlots();
         List<AvailabilitySlotResponse> responses = new ArrayList<>();
 
@@ -62,5 +68,10 @@ public class ClientOfferingController {
         }
 
         return ResponseEntity.ok(responses);
+
+    } catch (Exception exception) {
+        return ResponseEntity.badRequest().body(
+                new ActionResultResponse(false, exception.getMessage()));
     }
+}
 }

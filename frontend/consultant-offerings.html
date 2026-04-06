@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultant - Offerings</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Consultant - Manage Service Offerings</h1>
+        <nav>
+            <a href="consultant-home.html">Consultant Home</a>
+            <a href="consultant-availability.html">Manage Availability</a>
+            <a href="consultant-requests.html">Booking Requests</a>
+            <a href="consultant-schedule.html">Schedule</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Consultant Context</h2>
+            <div>
+                <label for="consultant-id-input">Consultant ID:</label>
+                <input id="consultant-id-input" type="text" value="consultant-1">
+            </div>
+            <button id="load-consultant-offering-data-button">Load My Offerings + Service Catalog</button>
+            <p id="consultant-offering-message"></p>
+        </section>
+
+        <section class="panel">
+            <h2>Available Consulting Services</h2>
+            <table id="service-catalog-table">
+                <thead>
+                    <tr>
+                        <th>Service ID</th>
+                        <th>Name</th>
+                        <th>Duration</th>
+                        <th>Base Price</th>
+                        <th>Description</th>
+                        <th>Select</th>
+                    </tr>
+                </thead>
+                <tbody id="service-catalog-table-body"></tbody>
+            </table>
+        </section>
+
+        <section class="panel">
+            <h2>Create Service Offering</h2>
+            <div>
+                <label for="service-id-input">Service ID:</label>
+                <input id="service-id-input" type="text" placeholder="service-1">
+            </div>
+            <div>
+                <label for="custom-price-input">Custom Price (optional):</label>
+                <input id="custom-price-input" type="number" min="0" step="0.01" placeholder="Leave blank to use base price">
+            </div>
+            <button id="create-service-offering-button">Create Offering</button>
+        </section>
+
+        <section class="panel">
+            <h2>My Offerings</h2>
+            <table id="consultant-offerings-table">
+                <thead>
+                    <tr>
+                        <th>Offering ID</th>
+                        <th>Service Name</th>
+                        <th>Consultant ID</th>
+                        <th>Consultant Name</th>
+                        <th>Duration</th>
+                        <th>Effective Price</th>
+                        <th>Description</th>
+						<th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="consultant-offerings-table-body"></tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
+    <script src="js/consultant/consultant-offerings.js"></script>
+</body>
+</html>

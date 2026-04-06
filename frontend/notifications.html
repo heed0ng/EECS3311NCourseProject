@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Center</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1 id="notification-page-heading">Notification Center</h1>
+        <nav>
+            <a href="index.html">Portal Index</a>
+            <a href="client-home.html">Client Home</a>
+            <a href="consultant-home.html">Consultant Home</a>
+            <a href="admin-home.html">Admin Home</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Load Notifications</h2>
+
+            <div>
+                <label for="notification-role-select">Role:</label>
+                <select id="notification-role-select">
+                    <option value="client">Client</option>
+                    <option value="consultant">Consultant</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="notification-user-id-input">User ID:</label>
+                <input id="notification-user-id-input" type="text">
+            </div>
+
+            <button id="load-notifications-button">Load Notifications</button>
+            <p id="notifications-message"></p>
+        </section>
+
+        <section class="panel">
+            <h2>Observer/Event Notes</h2>
+            <p id="notification-role-help"></p>
+            <p>This page shows events published during the current application run. Event history is not persisted to the database.</p>
+        </section>
+
+        <section class="panel">
+            <h2>Notification Feed</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Event ID</th>
+                        <th>Occurred At</th>
+                        <th>Event Type</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody id="notifications-table-body">
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
+    <script src="js/common/notifications.js"></script>
+</body>
+</html>

@@ -9,6 +9,7 @@ import java.util.List;
 import backend.api.dto.request.RequestBookingRequest;
 import backend.api.dto.response.ActionResultResponse;
 import backend.api.dto.response.BookingSummaryResponse;
+import backend.api.dto.response.CancellationSummaryResponse;
 import backend.api.mapper.BookingDtoMapper;
 
 import backend.service.BookingService;
@@ -39,26 +40,38 @@ public class ClientBookingController {
         }
     }
     
-    @GetMapping("/{clientId}/bookings")
-    public ResponseEntity<List<BookingSummaryResponse>> getClientBookings(
-            @PathVariable String clientId) {
+@GetMapping("/{clientId}/bookings")
+public ResponseEntity<?> getClientBookings(@PathVariable String clientId) {
+    List<BookingSummaryResponse> responses = new ArrayList<>();
 
-        List<BookingSummaryResponse> responses = new ArrayList<>();
+    try {
+        List<Booking> bookings = this.bookingService.getBookingHistory(clientId);
 
+        for (Booking currentBooking : bookings) {
+            responses.add(BookingDtoMapper.toBookingSummaryResponse(currentBooking));
+        }
+
+        return ResponseEntity.ok(responses);
+
+    } catch (Exception exception) {
+        return ResponseEntity.badRequest().body(
+                new ActionResultResponse(false, exception.getMessage()));
+    }
+}
+    
+    @GetMapping("/{clientId}/bookings/{bookingId}/cancellation-summary")
+    public ResponseEntity<?> getCancellationSummary(
+            @PathVariable String clientId,
+            @PathVariable String bookingId) {
         try {
-            List<Booking> bookings = this.bookingService.getBookingHistory(clientId);
+            String summaryMessage = this.bookingService.getCancellationSummary(clientId, bookingId);
 
-            for (Booking currentBooking : bookings) {
-                responses.add(BookingDtoMapper.toBookingSummaryResponse(currentBooking));
-            }
-
-            return ResponseEntity.ok(responses);
-
+            return ResponseEntity.ok(new CancellationSummaryResponse(bookingId, summaryMessage));
         } catch (Exception exception) {
-            return ResponseEntity.badRequest().body(responses);
+            return ResponseEntity.badRequest().body(new ActionResultResponse(false, exception.getMessage()));
         }
     }
-    
+      
     @PostMapping("/{clientId}/bookings/{bookingId}/cancel")
     public ResponseEntity<ActionResultResponse> cancelBooking(@PathVariable String clientId, @PathVariable String bookingId) {
         try {

@@ -15,15 +15,28 @@ public class RefundPolicy {
         this.refundPercentAfterDeadline = refundPercentAfterDeadline;
     }
 
-    public String getPolicyId() { return policyId; }
-    public double getRefundPercentBeforeDeadline() { return refundPercentBeforeDeadline; }
-    public void setRefundPercentBeforeDeadline(double percent) { this.refundPercentBeforeDeadline = percent; }
-    public double getRefundPercentAfterDeadline() { return refundPercentAfterDeadline; }
-    public void setRefundPercentAfterDeadline(double percent) { this.refundPercentAfterDeadline = percent; }
+    public String getPolicyId() {
+        return this.policyId;
+    }
+
+    public double getRefundPercentBeforeDeadline() {
+        return this.refundPercentBeforeDeadline;
+    }
+
+    public void setRefundPercentBeforeDeadline(double percent) {
+        this.refundPercentBeforeDeadline = percent;
+    }
+
+    public double getRefundPercentAfterDeadline() {
+        return this.refundPercentAfterDeadline;
+    }
+
+    public void setRefundPercentAfterDeadline(double percent) {
+        this.refundPercentAfterDeadline = percent;
+    }
 
     public double calculateRefund(Booking booking, LocalDateTime now, CancellationPolicy cancellationPolicy) {
-        LocalDateTime deadline = booking.getSlot().getStartDateTime().minusHours(cancellationPolicy.getCancellationDeadlineHours());
-        double percent = (now.isBefore(deadline) || now.isEqual(deadline)) ? this.refundPercentBeforeDeadline : this.refundPercentAfterDeadline;
-        return booking.getPrice() * percent / 100.0;
+        if (!cancellationPolicy.canCancel(booking, now)) return 0.0;
+        return booking.getPrice() * this.refundPercentBeforeDeadline / 100.0;
     }
 }

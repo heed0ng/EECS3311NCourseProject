@@ -22,26 +22,24 @@ public class ConsultantBookingController {
         this.consultantService = consultantService;
     }
 
-    @GetMapping("/{consultantId}/booking-requests")
-    public ResponseEntity<List<ConsultantRequestSummaryResponse>> getPendingBookingRequests(
-            @PathVariable String consultantId) {
+@GetMapping("/{consultantId}/booking-requests")
+public ResponseEntity<?> getPendingBookingRequests(@PathVariable String consultantId) {
+    List<ConsultantRequestSummaryResponse> responses = new ArrayList<>();
 
-        List<ConsultantRequestSummaryResponse> responses = new ArrayList<>();
+    try {
+        List<Booking> bookings = this.consultantService.getPendingBookingRequests(consultantId);
 
-        try {
-            List<Booking> bookings = this.consultantService.getPendingBookingRequests(consultantId);
-
-            for (Booking currentBooking : bookings) {
-                responses.add(toConsultantRequestSummaryResponse(currentBooking));
-            }
-
-            return ResponseEntity.ok(responses);
-
-        } catch (Exception exception) {
-            return ResponseEntity.badRequest().body(responses);
+        for (Booking currentBooking : bookings) {
+            responses.add(toConsultantRequestSummaryResponse(currentBooking));
         }
-    }
 
+        return ResponseEntity.ok(responses);
+
+    } catch (Exception exception) {
+        return ResponseEntity.badRequest().body(
+                new ActionResultResponse(false, exception.getMessage()));
+    }
+}
     @PostMapping("/{consultantId}/booking-requests/{bookingId}/accept")
     public ResponseEntity<ActionResultResponse> acceptBookingRequest(
             @PathVariable String consultantId,

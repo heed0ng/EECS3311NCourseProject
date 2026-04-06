@@ -24,7 +24,7 @@ public class AdminPolicyController {
     }
 
     @GetMapping("/policies")
-    public ResponseEntity<PolicySummaryResponse> getPolicySummary() {
+    public ResponseEntity<?> getPolicySummary() {
         try {
             PolicySummaryResponse response = AdminDtoMapper.toPolicySummaryResponse(
                     this.adminService.getCancellationPolicy(),
@@ -35,7 +35,8 @@ public class AdminPolicyController {
             return ResponseEntity.ok(response);
 
         } catch (Exception exception) {
-            return ResponseEntity.badRequest().body(new PolicySummaryResponse());
+            return ResponseEntity.badRequest().body(
+                    new ActionResultResponse(false, exception.getMessage()));
         }
     }
 

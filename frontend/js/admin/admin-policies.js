@@ -73,24 +73,23 @@ async function updateCancellationPolicy() {
 
 async function updateRefundPolicy() {
     const adminId = getAdminId();
-    const refundBeforeDeadline = document.getElementById("refund-before-deadline-input").value.trim();
-    const refundAfterDeadline = document.getElementById("refund-after-deadline-input").value.trim();
+    const eligibleRefundRate = document.getElementById("eligible-cancellation-refund-rate-input").value.trim();
 
     if (!adminId) {
         setText("admin-policy-message", "Admin ID is required.");
         return;
     }
 
-    if (refundBeforeDeadline === "" || refundAfterDeadline === "") {
-        setText("admin-policy-message", "Both refund percentage fields are required.");
+    if (eligibleRefundRate === "") {
+        setText("admin-policy-message", "Refund rate is required.");
         return;
     }
 
     try {
         const response = await apiPost("/api/admin/policies/refund", {
             adminId: adminId,
-            refundPercentBeforeDeadline: Number(refundBeforeDeadline),
-            refundPercentAfterDeadline: Number(refundAfterDeadline)
+            refundPercentBeforeDeadline: Number(eligibleRefundRate),
+            refundPercentAfterDeadline: 0
         });
 
         setText("admin-policy-message", response.message || "Refund policy updated successfully.");

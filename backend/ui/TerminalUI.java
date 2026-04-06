@@ -357,7 +357,7 @@ public class TerminalUI {
             consultantRepository.save(new Consultant("consultant-3", "Eric Consultant", "eric@example.com", ConsultantApprovalStatus.PENDING));
         }
         if (consultantRepository.findById("consultant-4").isEmpty()) {
-            consultantRepository.save(new Consultant("consultant-3", "Fred Consultant", "fred@example.com", ConsultantApprovalStatus.PENDING));
+            consultantRepository.save(new Consultant("consultant-4", "Fred Consultant", "fred@example.com", ConsultantApprovalStatus.PENDING));
         }
     }
 
@@ -386,15 +386,12 @@ public class TerminalUI {
         if (offeringRepository.findById("offering-1").isEmpty()) {
             offeringRepository.save(new ConsultantServiceOffering("offering-1", consultant, service1, 140.0, true));
         }
-
         if (offeringRepository.findById("offering-2").isEmpty()) {
-            offeringRepository.save(new ConsultantServiceOffering("offering-2", consultant, service2, null, true));
+            offeringRepository.save(new ConsultantServiceOffering("offering-2", consultant, service2, 10000.0, true));
         }
-        
         if (offeringRepository.findById("offering-3").isEmpty()) {
             offeringRepository.save(new ConsultantServiceOffering("offering-3", consultant, service3, null, true));
         }
-        
         if (offeringRepository.findById("offering-4").isEmpty()) {
             offeringRepository.save(new ConsultantServiceOffering("offering-4", consultant, service4, null, true));
         }
@@ -432,6 +429,8 @@ public class TerminalUI {
         if (!hasAliceVisa) paymentService.addSavedPaymentMethod("client-1", PaymentMethodType.CREDIT_CARD, "Alice Visa", "1111111111111111", "12/30|123");
         boolean hasAlicePaypal = paymentService.getSavedPaymentMethods("client-1").stream().anyMatch(method -> "Alice PayPal".equals(method.getDisplayLabel()));
         if (!hasAlicePaypal) paymentService.addSavedPaymentMethod("client-1", PaymentMethodType.PAYPAL, "Alice PayPal", "alice@example.com", "");
+        boolean hasAliceDebit = paymentService.getSavedPaymentMethods("client-1").stream().anyMatch(method -> "Delete/Update Me".equals(method.getDisplayLabel()));
+        if (!hasAliceDebit) paymentService.addSavedPaymentMethod("client-1", PaymentMethodType.DEBIT_CARD, "Delete/Update Me", "2222222222222222", "12/30|123");
     }
 
     public void subscribeDefaultObservers() {

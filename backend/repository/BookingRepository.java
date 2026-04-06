@@ -11,5 +11,6 @@ public interface BookingRepository {
     List<Booking> findByConsultant(String consultantId);
     List<Booking> findPendingRequestsForConsultant(String consultantId);
     List<Booking> findAll();
+    boolean hasNonTerminalBookingForSlot(String slotId);
     void save(Booking booking);
 }

@@ -22,8 +22,8 @@ public class AdminObserver implements Observer {
         return this.observerId;
     }
 
-	@Override
-	public boolean supports(DomainEvent event) {
-		return "ConsultantApproval".equals(event.getEventType());
-	}
+    @Override
+    public boolean supports(DomainEvent event) {
+        return "ConsultantApproval".equals(event.getEventType()) || "PolicyUpdated".equals(event.getEventType());
+    }
 }

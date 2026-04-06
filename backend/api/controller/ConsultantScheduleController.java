@@ -27,25 +27,24 @@ public class ConsultantScheduleController {
         this.bookingRepository = bookingRepository;
     }
 
-    @GetMapping("/{consultantId}/schedule")
-    public ResponseEntity<List<ConsultantScheduleEntryResponse>> getConsultantSchedule(
-            @PathVariable String consultantId) {
+@GetMapping("/{consultantId}/schedule")
+public ResponseEntity<?> getConsultantSchedule(@PathVariable String consultantId) {
+    List<ConsultantScheduleEntryResponse> responses = new ArrayList<>();
 
-        List<ConsultantScheduleEntryResponse> responses = new ArrayList<>();
+    try {
+        List<Booking> bookings = this.bookingRepository.findByConsultant(consultantId);
 
-        try {
-            List<Booking> bookings = this.bookingRepository.findByConsultant(consultantId);
-
-            for (Booking currentBooking : bookings) {
-                responses.add(toConsultantScheduleEntryResponse(currentBooking));
-            }
-
-            return ResponseEntity.ok(responses);
-
-        } catch (Exception exception) {
-            return ResponseEntity.badRequest().body(responses);
+        for (Booking currentBooking : bookings) {
+            responses.add(toConsultantScheduleEntryResponse(currentBooking));
         }
+
+        return ResponseEntity.ok(responses);
+
+    } catch (Exception exception) {
+        return ResponseEntity.badRequest().body(
+                new ActionResultResponse(false, exception.getMessage()));
     }
+}
 
     @PostMapping("/{consultantId}/schedule/{bookingId}/complete")
     public ResponseEntity<ActionResultResponse> completeBooking(

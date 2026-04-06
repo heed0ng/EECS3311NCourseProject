@@ -1,8 +1,12 @@
 package backend.config;
 
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import backend.observer.AdminObserver;
+import backend.observer.ClientObserver;
+import backend.observer.ConsultantObserver;
 import backend.observer.EventPublisher;
 import backend.paymentStrategy.PaymentStrategyFactory;
 import backend.repository.*;
@@ -175,4 +179,33 @@ public class ApplicationConfig {
                 bookingService,
                 policyRepository);
     }
+    
+    @Bean
+    public CommandLineRunner subscribeSpringObservers(
+            EventPublisher eventPublisher,
+            AdminRepository adminRepository,
+            ClientRepository clientRepository,
+            ConsultantRepository consultantRepository) {
+
+        return args -> {
+            for (var currentConsultant : consultantRepository.findAll()) {
+                eventPublisher.subscribe(new ConsultantObserver(
+                        "observer-consultant-" + currentConsultant.getUserId(),
+                        currentConsultant.getName()));
+            }
+
+            for (var currentClient : clientRepository.findAll()) {
+                eventPublisher.subscribe(new ClientObserver(
+                        "observer-client-" + currentClient.getUserId(),
+                        currentClient.getName()));
+            }
+
+            for (var currentAdmin : adminRepository.findAll()) {
+                eventPublisher.subscribe(new AdminObserver(
+                        "observer-admin-" + currentAdmin.getUserId(),
+                        currentAdmin.getName()));
+            }
+        };
+    }
+    
 }

@@ -26,26 +26,25 @@ public class ClientPaymentMethodController {
         this.paymentService = paymentService;
     }
 
-    @GetMapping("/{clientId}/payment-methods")
-    public ResponseEntity<List<SavedPaymentMethodResponse>> getSavedPaymentMethods(
-            @PathVariable String clientId) {
+@GetMapping("/{clientId}/payment-methods")
+public ResponseEntity<?> getSavedPaymentMethods(@PathVariable String clientId) {
+    List<SavedPaymentMethodResponse> responses = new ArrayList<>();
 
-        List<SavedPaymentMethodResponse> responses = new ArrayList<>();
+    try {
+        List<SavedPaymentMethod> savedPaymentMethods =
+                this.paymentService.getSavedPaymentMethods(clientId);
 
-        try {
-            List<SavedPaymentMethod> savedPaymentMethods =
-                    this.paymentService.getSavedPaymentMethods(clientId);
-
-            for (SavedPaymentMethod currentSavedPaymentMethod : savedPaymentMethods) {
-                responses.add(PaymentDtoMapper.toSavedPaymentMethodResponse(currentSavedPaymentMethod));
-            }
-
-            return ResponseEntity.ok(responses);
-
-        } catch (Exception exception) {
-            return ResponseEntity.badRequest().body(responses);
+        for (SavedPaymentMethod currentSavedPaymentMethod : savedPaymentMethods) {
+            responses.add(PaymentDtoMapper.toSavedPaymentMethodResponse(currentSavedPaymentMethod));
         }
+
+        return ResponseEntity.ok(responses);
+
+    } catch (Exception exception) {
+        return ResponseEntity.badRequest().body(
+                new ActionResultResponse(false, exception.getMessage()));
     }
+}
 
     @PostMapping("/{clientId}/payment-methods")
     public ResponseEntity<ActionResultResponse> addSavedPaymentMethod(

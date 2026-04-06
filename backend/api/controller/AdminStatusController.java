@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import backend.api.dto.response.ActionResultResponse;
 import backend.api.dto.response.SystemStatusResponse;
 import backend.model.core.Booking;
 import backend.repository.BookingRepository;
@@ -25,45 +26,46 @@ public class AdminStatusController {
         this.bookingRepository = bookingRepository;
     }
 
-    @GetMapping("/status")
-    public ResponseEntity<SystemStatusResponse> getSystemStatus() {
-        try {
-            int pendingConsultantCount = this.consultantRepository.findPendingApproval().size();
+@GetMapping("/status")
+public ResponseEntity<?> getSystemStatus() {
+    try {
+        int pendingConsultantCount = this.consultantRepository.findPendingApproval().size();
 
-            List<Booking> allBookings = this.bookingRepository.findAll();
+        List<Booking> allBookings = this.bookingRepository.findAll();
 
-            int requestedBookingCount = 0;
-            int pendingPaymentCount = 0;
-            int paidBookingCount = 0;
-            int completedBookingCount = 0;
+        int requestedBookingCount = 0;
+        int pendingPaymentCount = 0;
+        int paidBookingCount = 0;
+        int completedBookingCount = 0;
 
-            for (Booking currentBooking : allBookings) {
-                String currentStateName = currentBooking.getStateName();
+        for (Booking currentBooking : allBookings) {
+            String currentStateName = currentBooking.getStateName();
 
-                if ("Requested".equals(currentStateName)) {
-                    requestedBookingCount++;
-                } else if ("Pending Payment".equals(currentStateName)) {
-                    pendingPaymentCount++;
-                } else if ("Paid".equals(currentStateName)) {
-                    paidBookingCount++;
-                } else if ("Completed".equals(currentStateName)) {
-                    completedBookingCount++;
-                }
+            if ("Requested".equals(currentStateName)) {
+                requestedBookingCount++;
+            } else if ("Pending Payment".equals(currentStateName)) {
+                pendingPaymentCount++;
+            } else if ("Paid".equals(currentStateName)) {
+                paidBookingCount++;
+            } else if ("Completed".equals(currentStateName)) {
+                completedBookingCount++;
             }
-
-            SystemStatusResponse response = new SystemStatusResponse(
-                    pendingConsultantCount,
-                    requestedBookingCount,
-                    pendingPaymentCount,
-                    paidBookingCount,
-                    completedBookingCount,
-                    null
-            );
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception exception) {
-            return ResponseEntity.badRequest().body(new SystemStatusResponse());
         }
+
+        SystemStatusResponse response = new SystemStatusResponse(
+                pendingConsultantCount,
+                requestedBookingCount,
+                pendingPaymentCount,
+                paidBookingCount,
+                completedBookingCount,
+                null
+        );
+
+        return ResponseEntity.ok(response);
+
+    } catch (Exception exception) {
+        return ResponseEntity.badRequest().body(
+                new ActionResultResponse(false, exception.getMessage()));
     }
+}
 }

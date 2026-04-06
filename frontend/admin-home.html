@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Home</title>
+    <link rel="stylesheet" href="css/styles.css">
+	<script src="js/common/config.js"></script>
+	<script src="js/common/api.js"></script>
+	<script src="js/common/dom.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Admin Home</h1>
+        <nav>
+            <a href="index.html">Portal Index</a>
+            <a href="admin-consultants.html">Consultant Approvals</a>
+            <a href="admin-status.html">System Status</a>
+            <a href="admin-policies.html">Policies</a>
+			<a href="notifications.html?role=admin">Notifications</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Available Admin Workflows</h2>
+            <ul>
+                <li>Approve or reject consultant registrations</li>
+                <li>Review platform status counts</li>
+                <li>Manage cancellation, refund, pricing, and notification policies</li>
+				<li>Review policy, consultant approval notifications</li>
+            </ul>
+        </section>
+
+        <section class="panel">
+            <h2>Quick Start</h2>
+            <p>Default demo admin: <strong>admin-1</strong></p>
+            <ul>
+                <li><a href="admin-consultants.html">Go to consultant approvals</a></li>
+                <li><a href="admin-status.html">Go to system status</a></li>
+                <li><a href="admin-policies.html">Go to policy management</a></li>
+				<li><a href="notifications.html?role=admin">Go to notifications</a></li>
+            </ul>
+        </section>
+    </main>
+</body>
+</html>
