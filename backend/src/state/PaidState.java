@@ -3,10 +3,29 @@ package backend.state;
 import backend.model.core.Booking;
 
 public class PaidState extends AbstractBookingState {
-	@Override
-    public void cancel(Booking booking) { booking.setState(new CancelledState()); }
+
     @Override
-    public void complete(Booking booking) { booking.setState(new CompletedState()); }
+    public void cancel(Booking booking) {
+        booking.setState(new CancelledState());
+    }
+
     @Override
-    public String getName() { return "Paid"; }
+    public void complete(Booking booking) {
+        booking.setState(new CompletedState());
+    }
+
+    @Override
+    public boolean canClientCancel() {
+        return true;
+    }
+
+    @Override
+    public String getClientCancellationBlockedReason() {
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return "Paid";
+    }
 }

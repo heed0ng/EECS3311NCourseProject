@@ -1,19 +1,22 @@
 package backend.api.controller;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import backend.api.dto.response.ActionResultResponse;
 import backend.api.dto.response.NotificationEventResponse;
-import backend.model.notification.DomainEvent;
-import backend.observer.EventPublisher;
+import backend.model.notification.UserNotification;
 import backend.repository.AdminRepository;
 import backend.repository.ClientRepository;
 import backend.repository.ConsultantRepository;
+import backend.service.NotificationService;
 import backend.util.EntityNotFoundException;
 
 @RestController
@@ -21,17 +24,14 @@ import backend.util.EntityNotFoundException;
 @CrossOrigin(origins = "*")
 public class NotificationController {
 
-    private final EventPublisher eventPublisher;
+    private final NotificationService notificationService;
     private final ClientRepository clientRepository;
     private final ConsultantRepository consultantRepository;
     private final AdminRepository adminRepository;
 
-    public NotificationController(
-            EventPublisher eventPublisher,
-            ClientRepository clientRepository,
-            ConsultantRepository consultantRepository,
-            AdminRepository adminRepository) {
-        this.eventPublisher = eventPublisher;
+    public NotificationController(NotificationService notificationService, ClientRepository clientRepository,
+        ConsultantRepository consultantRepository,AdminRepository adminRepository) {
+        this.notificationService = notificationService;
         this.clientRepository = clientRepository;
         this.consultantRepository = consultantRepository;
         this.adminRepository = adminRepository;
@@ -40,98 +40,39 @@ public class NotificationController {
     @GetMapping("/client/{clientId}/notifications")
     public ResponseEntity<?> getClientNotifications(@PathVariable String clientId) {
         try {
-            this.clientRepository.findById(clientId)
-                    .orElseThrow(() -> new EntityNotFoundException("Client not found."));
+            this.clientRepository.findById(clientId).orElseThrow(() -> new EntityNotFoundException("Client not found."));
 
-            return ResponseEntity.ok(this.buildResponses(event -> this.supportsClient(clientId, event)));
-
+            return ResponseEntity.ok(this.toResponses(this.notificationService.getClientNotifications(clientId)));
         } catch (Exception exception) {
-            return ResponseEntity.badRequest().body(
-                    new ActionResultResponse(false, exception.getMessage()));
+            return ResponseEntity.badRequest().body(new ActionResultResponse(false, exception.getMessage()));
         }
     }
 
     @GetMapping("/consultant/{consultantId}/notifications")
     public ResponseEntity<?> getConsultantNotifications(@PathVariable String consultantId) {
         try {
-            this.consultantRepository.findById(consultantId)
-                    .orElseThrow(() -> new EntityNotFoundException("Consultant not found."));
+            this.consultantRepository.findById(consultantId).orElseThrow(() -> new EntityNotFoundException("Consultant not found."));
 
-            return ResponseEntity.ok(this.buildResponses(event -> this.supportsConsultant(consultantId, event)));
-
+            return ResponseEntity.ok(this.toResponses(this.notificationService.getConsultantNotifications(consultantId))
+            );
         } catch (Exception exception) {
-            return ResponseEntity.badRequest().body(
-                    new ActionResultResponse(false, exception.getMessage()));
+            return ResponseEntity.badRequest().body(new ActionResultResponse(false, exception.getMessage()));
         }
     }
 
     @GetMapping("/admin/{adminId}/notifications")
     public ResponseEntity<?> getAdminNotifications(@PathVariable String adminId) {
         try {
-            this.adminRepository.findById(adminId)
-                    .orElseThrow(() -> new EntityNotFoundException("Admin not found."));
+            this.adminRepository.findById(adminId).orElseThrow(() -> new EntityNotFoundException("Admin not found."));
 
-            return ResponseEntity.ok(this.buildResponses(event -> this.supportsAdmin(adminId, event)));
-
+            return ResponseEntity.ok(this.toResponses(this.notificationService.getAdminNotifications(adminId)));
         } catch (Exception exception) {
-            return ResponseEntity.badRequest().body(
-                    new ActionResultResponse(false, exception.getMessage()));
+            return ResponseEntity.badRequest().body(new ActionResultResponse(false, exception.getMessage()));
         }
     }
 
-    private List<NotificationEventResponse> buildResponses(Predicate<DomainEvent> predicate) {
-        List<DomainEvent> publishedEvents = this.eventPublisher.getPublishedEvents();
-        List<NotificationEventResponse> responses = new ArrayList<>();
-
-        for (int index = publishedEvents.size() - 1; index >= 0; index--) {
-            DomainEvent currentEvent = publishedEvents.get(index);
-
-            if (predicate.test(currentEvent)) {
-                responses.add(new NotificationEventResponse(
-                        currentEvent.getEventId(),
-                        currentEvent.getOccurredAt().toString(),
-                        currentEvent.getEventType(),
-                        currentEvent.getMessage()));
-            }
-        }
-
-        return responses;
-    }
-
-    private boolean supportsClient(String clientId, DomainEvent event) {
-        String eventType = event.getEventType();
-
-        if (!("BookingAccepted".equals(eventType)
-                || "BookingRejected".equals(eventType)
-                || "BookingCancelled".equals(eventType)
-                || "PaymentProcessed".equals(eventType)
-                || "BookingRequested".equals(eventType))) {
-            return false;
-        }
-
-        return event.getClientId() == null || event.getClientId().equals(clientId);
-    }
-
-    private boolean supportsConsultant(String consultantId, DomainEvent event) {
-        String eventType = event.getEventType();
-
-        if (!("BookingRequested".equals(eventType)
-                || "BookingCancelled".equals(eventType)
-                || "PaymentProcessed".equals(eventType)
-                || "PolicyUpdated".equals(eventType))) {
-            return false;
-        }
-
-        return event.getConsultantId() == null || event.getConsultantId().equals(consultantId);
-    }
-
-    private boolean supportsAdmin(String adminId, DomainEvent event) {
-        String eventType = event.getEventType();
-
-        if (!("ConsultantApproval".equals(eventType) || "PolicyUpdated".equals(eventType))) {
-            return false;
-        }
-
-        return event.getAdminId() == null || event.getAdminId().equals(adminId);
+    private List<NotificationEventResponse> toResponses(List<UserNotification> notifications) {
+        return notifications.stream().map(notification -> new NotificationEventResponse(notification.getSourceEventId(),
+                notification.getOccurredAt().toString(), notification.getEventType(), notification.getMessage())).collect(Collectors.toList());
     }
 }

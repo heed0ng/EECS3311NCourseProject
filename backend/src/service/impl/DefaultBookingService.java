@@ -178,23 +178,12 @@ public class DefaultBookingService implements BookingService {
     }
 
     private void ensureClientCancellationStateAllowed(Booking booking) {
-        String stateName = booking.getStateName();
-
-        if (!"Requested".equals(stateName) && !"Confirmed".equals(stateName) && !"Pending Payment".equals(stateName) && !"Paid".equals(stateName)) {
-            throw new BusinessRuleViolationException("Cannot cancel when booking is in state " + stateName + ".");
-        }
+        if (!booking.canClientCancel()) throw new BusinessRuleViolationException(booking.getClientCancellationBlockedReason());
     }
 
     private String buildNonCancellableStateSummaryMessage(Booking booking) {
-        String stateName = booking.getStateName();
-
-        if ("Cancelled".equals(stateName)) return "Booking is already cancelled.";
-        if ("Rejected".equals(stateName)) return "Booking was already rejected by the consultant.";
-        if ("Completed".equals(stateName)) return "Booking is already completed and can no longer be cancelled.";
-        if (!"Requested".equals(stateName) && !"Confirmed".equals(stateName) && !"Pending Payment".equals(stateName) && !"Paid".equals(stateName)) {
-            return "Cancellation is not available when booking is in state " + stateName + ".";
-        }
-        return null;
+        if (booking.canClientCancel()) return null;
+        return booking.getClientCancellationBlockedReason();
     }
 
     private void publishRequested(Booking booking) {

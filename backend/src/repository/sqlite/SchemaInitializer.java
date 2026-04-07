@@ -27,6 +27,8 @@ public class SchemaInitializer {
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS saved_payment_methods (saved_method_id TEXT PRIMARY KEY, client_id TEXT NOT NULL, method_type TEXT NOT NULL, display_label TEXT NOT NULL, payment_details TEXT NOT NULL, payment_detail_data TEXT, FOREIGN KEY (client_id) REFERENCES clients(user_id))");
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS payment_transactions (transaction_id TEXT PRIMARY KEY, booking_id TEXT NOT NULL, client_id TEXT NOT NULL, transaction_type TEXT NOT NULL, status TEXT NOT NULL, method_type TEXT NOT NULL, amount REAL NOT NULL, created_at TEXT NOT NULL, FOREIGN KEY (booking_id) REFERENCES bookings(booking_id), FOREIGN KEY (client_id) REFERENCES clients(user_id))");
             
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS notifications (notification_id INTEGER PRIMARY KEY AUTOINCREMENT, source_event_id TEXT NOT NULL, recipient_user_id TEXT NOT NULL, recipient_role TEXT NOT NULL, event_type TEXT NOT NULL, message TEXT NOT NULL, occurred_at TEXT NOT NULL, is_read INTEGER NOT NULL)");
+            
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS cancellation_policies (policy_id TEXT PRIMARY KEY, cancellation_deadline_hours INTEGER NOT NULL)");
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS refund_policies (policy_id TEXT PRIMARY KEY, refund_percent_before_deadline REAL NOT NULL, refund_percent_after_deadline REAL NOT NULL)");
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS pricing_policies (policy_id TEXT PRIMARY KEY, allow_consultant_custom_price INTEGER NOT NULL)");

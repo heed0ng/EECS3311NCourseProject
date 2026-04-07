@@ -341,12 +341,12 @@ public class TerminalUI {
         insertAdminIfMissing("admin-1", "System Admin", "admin@example.com");
     }
     
-    private void seedDemoClientsIfMissing() {
+    public void seedDemoClientsIfMissing() {
         if (clientRepository.findById("client-1").isEmpty()) clientRepository.save(new Client("client-1", "Alice Client", "alice@example.com"));
         if (clientRepository.findById("client-2").isEmpty()) clientRepository.save(new Client("client-2", "Bob Client", "bob@example.com"));
     }
 
-    private void seedDemoConsultantsIfMissing() {
+    public void seedDemoConsultantsIfMissing() {
         if (consultantRepository.findById("consultant-1").isEmpty()) {
             consultantRepository.save(new Consultant("consultant-1", "Charlie Consultant", "char@example.com", ConsultantApprovalStatus.APPROVED));
         }
@@ -361,7 +361,7 @@ public class TerminalUI {
         }
     }
 
-    private void seedDemoServicesIfMissing() {
+    public void seedDemoServicesIfMissing() {
         if (consultingServiceRepository.findById("service-1").isEmpty()) {
             consultingServiceRepository.save(new ConsultingService("service-1", "Software Design Consulting", "UML, patterns, architecture review.", 60, 120.0, true));
         }
@@ -376,7 +376,7 @@ public class TerminalUI {
         }
     }
 
-    private void seedDemoOfferingsIfMissing() {
+    public void seedDemoOfferingsIfMissing() {
         Consultant consultant = consultantRepository.findById("consultant-1").orElseThrow(() -> new IllegalStateException("Missing seeded consultant consultant-1."));
         ConsultingService service1 = consultingServiceRepository.findById("service-1").orElseThrow(() -> new IllegalStateException("Missing seeded service service-1."));
         ConsultingService service2 = consultingServiceRepository.findById("service-2").orElseThrow(() -> new IllegalStateException("Missing seeded service service-2."));
@@ -397,7 +397,7 @@ public class TerminalUI {
         }
     }
 
-    private void seedDemoSlotsIfMissing() {
+    public void seedDemoSlotsIfMissing() {
         Consultant consultant = consultantRepository.findById("consultant-1")
                 .orElseThrow(() -> new IllegalStateException("Missing seeded consultant consultant-1."));
 
@@ -424,7 +424,7 @@ public class TerminalUI {
         if (slotRepository.findById("slot-5").isEmpty()) slotRepository.save(new AvailabilitySlot("slot-5", consultant, slot5Start, slot5End, true));
     }
 
-    private void seedDemoPaymentMethodsIfMissing() {
+    public void seedDemoPaymentMethodsIfMissing() {
         boolean hasAliceVisa = paymentService.getSavedPaymentMethods("client-1").stream().anyMatch(method -> "Alice Visa".equals(method.getDisplayLabel()));
         if (!hasAliceVisa) paymentService.addSavedPaymentMethod("client-1", PaymentMethodType.CREDIT_CARD, "Alice Visa", "1111111111111111", "12/30|123");
         boolean hasAlicePaypal = paymentService.getSavedPaymentMethods("client-1").stream().anyMatch(method -> "Alice PayPal".equals(method.getDisplayLabel()));
@@ -433,15 +433,16 @@ public class TerminalUI {
         if (!hasAliceDebit) paymentService.addSavedPaymentMethod("client-1", PaymentMethodType.DEBIT_CARD, "Delete/Update Me", "2222222222222222", "12/30|123");
     }
 
+    
     public void subscribeDefaultObservers() {
-        System.out.println("[Startup] Subscribing console demo observers from seeded persisted users.");
-
-        consultantRepository.findById("consultant-1").ifPresent(consultant -> eventPublisher.subscribe(new ConsultantObserver("observer-consultant-" + consultant.getUserId(), consultant.getName())));
-        clientRepository.findById("client-1").ifPresent(client -> eventPublisher.subscribe(new ClientObserver("observer-client-" + client.getUserId(), client.getName())));
-        adminRepository.findById("admin-1").ifPresent(admin -> eventPublisher.subscribe(new AdminObserver("observer-admin-" + admin.getUserId(), admin.getName())));
+//        System.out.println("[Startup] Subscribing console demo observers from seeded persisted users.");
+//
+//        consultantRepository.findById("consultant-1").ifPresent(consultant -> eventPublisher.subscribe(new ConsultantObserver("observer-consultant-" + consultant.getUserId(), consultant.getName())));
+//        clientRepository.findById("client-1").ifPresent(client -> eventPublisher.subscribe(new ClientObserver("observer-client-" + client.getUserId(), client.getName())));
+//        adminRepository.findById("admin-1").ifPresent(admin -> eventPublisher.subscribe(new AdminObserver("observer-admin-" + admin.getUserId(), admin.getName())));
     }
 
-    private void insertAdminIfMissing(String adminId, String name, String email) {
+    public void insertAdminIfMissing(String adminId, String name, String email) {
         if (adminRepository.findById(adminId).isPresent()) return;
         adminRepository.save(new Admin(adminId, name, email));
     }

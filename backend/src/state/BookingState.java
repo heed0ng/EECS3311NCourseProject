@@ -9,5 +9,8 @@ public interface BookingState {
     void reject(Booking booking);
     void cancel(Booking booking);
     void complete(Booking booking);
+    boolean canClientCancel();
+    String getClientCancellationBlockedReason();
+    boolean isTerminal();
     String getName();
 }
