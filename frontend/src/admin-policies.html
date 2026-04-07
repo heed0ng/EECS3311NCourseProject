@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Policies</title>
     <link rel="stylesheet" href="css/styles.css">
-	<script src="js/common/config.js"></script>
-	<script src="js/common/api.js"></script>
-	<script src="js/common/dom.js"></script>
-	<script src="js/admin/admin-policies.js"></script>
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
+    <script src="js/admin/admin-policies.js"></script>
 </head>
 <body>
     <header>
@@ -35,7 +35,7 @@
 
         <section class="panel">
             <h2>Current Policy Summary</h2>
-            <table>
+            <table class="summary-table">
                 <tbody>
                     <tr>
                         <th>Cancellation</th>
@@ -57,48 +57,50 @@
             </table>
         </section>
 
-        <section class="panel">
-            <h2>Update Cancellation Policy</h2>
-            <div>
-                <label for="cancellation-deadline-hours-input">Cancellation Deadline Hours:</label>
-                <input id="cancellation-deadline-hours-input" type="number" min="0" step="1">
-            </div>
-            <button id="update-cancellation-policy-button">Update Cancellation Policy</button>
-        </section>
+        <div class="policy-grid">
+            <section class="panel">
+                <h2>Update Cancellation Policy</h2>
+                <div>
+                    <label for="cancellation-deadline-hours-input">Cancellation Deadline Hours:</label>
+                    <input id="cancellation-deadline-hours-input" type="number" min="0" step="1">
+                </div>
+                <button id="update-cancellation-policy-button">Update Cancellation Policy</button>
+            </section>
 
-		<section class="panel">
-		    <h2>Update Refund Policy</h2>
-		    <div>
-		        <label for="eligible-cancellation-refund-rate-input">
-		            Refund Rate for Eligible Cancellations (%):
-		        </label>
-		        <input id="eligible-cancellation-refund-rate-input" type="number" min="0" max="100" step="0.01">
-		    </div>
-		    <p>Bookings cancelled after the deadline are not refundable because cancellation is no longer allowed.</p>
-		    <button id="update-refund-policy-button">Update Refund Policy</button>
-		</section>
+            <section class="panel">
+                <h2>Update Refund Policy</h2>
+                <div>
+                    <label for="eligible-cancellation-refund-rate-input">
+                        Refund Rate for Eligible Cancellations (%):
+                    </label>
+                    <input id="eligible-cancellation-refund-rate-input" type="number" min="0" max="100" step="0.01">
+                </div>
+                <p class="note">Bookings cancelled after the deadline are not refundable because cancellation is no longer allowed.</p>
+                <button id="update-refund-policy-button">Update Refund Policy</button>
+            </section>
 
-        <section class="panel">
-            <h2>Update Pricing Policy</h2>
-            <div>
-                <label>
-                    <input id="allow-consultant-custom-price-input" type="checkbox">
-                    Allow consultant custom price
-                </label>
-            </div>
-            <button id="update-pricing-policy-button">Update Pricing Policy</button>
-        </section>
+            <section class="panel">
+                <h2>Update Pricing Policy</h2>
+                <div class="checkbox-row">
+                    <label class="checkbox-label">
+                        <input id="allow-consultant-custom-price-input" type="checkbox">
+                        <span>Allow consultant custom price</span>
+                    </label>
+                </div>
+                <button id="update-pricing-policy-button">Update Pricing Policy</button>
+            </section>
 
-        <section class="panel">
-            <h2>Update Notification Policy</h2>
-            <div><label><input id="notify-on-booking-requested-input" type="checkbox"> Notify on booking requested</label></div>
-            <div><label><input id="notify-on-booking-accepted-input" type="checkbox"> Notify on booking accepted</label></div>
-            <div><label><input id="notify-on-booking-rejected-input" type="checkbox"> Notify on booking rejected</label></div>
-            <div><label><input id="notify-on-payment-processed-input" type="checkbox"> Notify on payment processed</label></div>
-            <div><label><input id="notify-on-booking-cancelled-input" type="checkbox"> Notify on booking cancelled</label></div>
-            <div><label><input id="notify-on-consultant-approval-decision-input" type="checkbox"> Notify on consultant approval decision</label></div>
-            <button id="update-notification-policy-button">Update Notification Policy</button>
-        </section>
+            <section class="panel">
+                <h2>Update Notification Policy</h2>
+                <div class="checkbox-row"><label class="checkbox-label"><input id="notify-on-booking-requested-input" type="checkbox"><span>Notify on booking requested</span></label></div>
+                <div class="checkbox-row"><label class="checkbox-label"><input id="notify-on-booking-accepted-input" type="checkbox"><span>Notify on booking accepted</span></label></div>
+                <div class="checkbox-row"><label class="checkbox-label"><input id="notify-on-booking-rejected-input" type="checkbox"><span>Notify on booking rejected</span></label></div>
+                <div class="checkbox-row"><label class="checkbox-label"><input id="notify-on-payment-processed-input" type="checkbox"><span>Notify on payment processed</span></label></div>
+                <div class="checkbox-row"><label class="checkbox-label"><input id="notify-on-booking-cancelled-input" type="checkbox"><span>Notify on booking cancelled</span></label></div>
+                <div class="checkbox-row"><label class="checkbox-label"><input id="notify-on-consultant-approval-decision-input" type="checkbox"><span>Notify on consultant approval decision</span></label></div>
+                <button id="update-notification-policy-button">Update Notification Policy</button>
+            </section>
+        </div>
     </main>
 
 </body>
