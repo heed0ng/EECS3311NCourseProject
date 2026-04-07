@@ -247,7 +247,6 @@ Available under `diagrams/PlantUMLs/`:
 
 ## 9\.  Limitations
 
-* notifications are currently **in-memory** and are not persisted to SQLite thus, volatile
 * AI retrieval is **simple/manual faked RAG**, not vector-database-based retrieval
 * SQLite is kept instead of actual SQL server running on the Database Server
 * UI styling is minimal and **NOT** production level
