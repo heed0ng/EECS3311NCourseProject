@@ -5,45 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consultant Home</title>
     <link rel="stylesheet" href="css/styles.css">
-	<script src="js/common/config.js"></script>
-	<script src="js/common/api.js"></script>
-	<script src="js/common/dom.js"></script>
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
 </head>
 <body>
     <header>
         <h1>Consultant Home</h1>
+        <p>Manage availability, publish offerings, respond to requests, and complete eligible bookings.</p>
         <nav>
             <a href="index.html">Portal Index</a>
             <a href="consultant-availability.html">Manage Availability</a>
             <a href="consultant-offerings.html">Manage Offerings</a>
             <a href="consultant-requests.html">Booking Requests</a>
             <a href="consultant-schedule.html">Schedule</a>
-			<a href="notifications.html?role=consultant">Notifications</a>
+            <a href="notifications.html?role=consultant">Notifications</a>
         </nav>
     </header>
 
     <main>
+        <section class="panel hero">
+            <span class="pill">Demo consultant: consultant-1</span>
+            <h2>Consultant Workspace</h2>
+            <p>
+                This area supports availability management, offering setup, booking request review,
+                schedule monitoring, and consultant-facing notifications.
+            </p>
+            <div class="quick-links">
+                <a class="button-link" href="consultant-availability.html">Open availability</a>
+                <a class="button-link" href="consultant-offerings.html">Open offerings</a>
+                <a class="button-link" href="consultant-requests.html">Review requests</a>
+                <a class="button-link" href="consultant-schedule.html">Open schedule</a>
+            </div>
+        </section>
+
         <section class="panel">
             <h2>Available Consultant Workflows</h2>
-            <ul>
-                <li>View and add availability slots</li>
-                <li>View active consulting services and create offerings</li>
+            <ul class="feature-list">
+                <li>View, add, update, and remove availability slots</li>
+                <li>View active consulting services and manage offerings</li>
                 <li>Accept or reject booking requests</li>
-                <li>View schedule and complete paid bookings</li>
-				<li>Review booking related and consultant approval notifications</li>
+                <li>Review scheduled bookings and complete paid sessions after they end</li>
+                <li>Review consultant-facing booking and policy notifications</li>
             </ul>
         </section>
 
         <section class="panel">
             <h2>Quick Start</h2>
-            <p>Default demo consultant: <strong>consultant-1</strong></p>
-            <ul>
-                <li><a href="consultant-availability.html">Go to availability</a></li>
-                <li><a href="consultant-offerings.html">Go to offerings</a></li>
-                <li><a href="consultant-requests.html">Go to booking requests</a></li>
-                <li><a href="consultant-schedule.html">Go to schedule</a></li>
-				<li><a href="notifications.html?role=consultant">Go to notifications</a></li>
-            </ul>
+            <p class="note">
+                Recommended demo flow: add or review availability → manage offerings →
+                accept/reject a booking request → open schedule → review notifications.
+            </p>
+            <div class="quick-links">
+                <a class="button-link" href="consultant-availability.html">Go to availability</a>
+                <a class="button-link" href="consultant-offerings.html">Go to offerings</a>
+                <a class="button-link" href="consultant-requests.html">Go to booking requests</a>
+                <a class="button-link" href="consultant-schedule.html">Go to schedule</a>
+                <a class="button-link" href="notifications.html?role=consultant">Go to notifications</a>
+            </div>
         </section>
     </main>
 </body>

@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Client Home</title>
     <link rel="stylesheet" href="css/styles.css">
-	<script src="js/common/config.js"></script>
-	<script src="js/common/api.js"></script>
-	<script src="js/common/dom.js"></script>
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
+	<script src="js/common/chat-assistant-widget.js"></script>
 </head>
 <body>
     <header>
         <h1>Client Home</h1>
+        <p>Browse services, request bookings, manage payments, and ask the AI assistant about the platform.</p>
         <nav>
             <a href="index.html">Portal Index</a>
             <a href="client-services.html">Browse Services</a>
@@ -19,34 +21,52 @@
             <a href="client-payment-methods.html">Payment Methods</a>
             <a href="client-payments.html">Payments</a>
             <a href="client-chatbot.html">AI Assistant</a>
-			<a href="notifications.html?role=client">Notifications</a>
+            <a href="notifications.html?role=client">Notifications</a>
         </nav>
     </header>
 
     <main>
+        <section class="panel hero">
+            <span class="pill">Demo client: client-1</span>
+            <h2>Client Portal</h2>
+            <p>
+                Use this area to browse public consulting offerings, submit booking requests,
+                manage payment methods, process payments, and review client-facing notifications.
+            </p>
+            <div class="quick-links">
+                <a class="button-link" href="client-services.html">Start browsing services</a>
+                <a class="button-link" href="client-bookings.html">Open booking history</a>
+                <a class="button-link" href="client-payments.html">Review payments</a>
+                <a class="button-link" href="client-chatbot.html">Open AI assistant</a>
+            </div>
+        </section>
+
         <section class="panel">
             <h2>Available Client Workflows</h2>
-            <ul>
+            <ul class="feature-list">
                 <li>Browse consulting services and request a booking</li>
                 <li>View booking history and cancel eligible bookings</li>
                 <li>Manage saved payment methods</li>
                 <li>Process payments and review payment history</li>
-                <li>Ask the general platform assistant</li>
-				<li>Review booking states notifications</li>
+                <li>Ask a general platform assistant about workflows and policies</li>
+                <li>Review client-facing booking and payment notifications</li>
             </ul>
         </section>
 
         <section class="panel">
             <h2>Quick Start</h2>
-            <p>Default demo client: <strong>client-1</strong></p>
-            <ul>
-                <li><a href="client-services.html">Go to service browsing</a></li>
-                <li><a href="client-bookings.html">Go to booking history</a></li>
-                <li><a href="client-payment-methods.html">Go to payment methods</a></li>
-                <li><a href="client-payments.html">Go to payments</a></li>
-				<li><a href="notifications.html?role=client">Go to notifications</a></li>
-                <li><a href="client-chatbot.html">Go to AI assistant</a></li>
-            </ul>
+            <p class="note">
+                Recommended demo flow: browse services → request booking → check bookings →
+                process payment → open notifications → test the AI assistant.
+            </p>
+            <div class="quick-links">
+                <a class="button-link" href="client-services.html">Go to service browsing</a>
+                <a class="button-link" href="client-bookings.html">Go to booking history</a>
+                <a class="button-link" href="client-payment-methods.html">Go to payment methods</a>
+                <a class="button-link" href="client-payments.html">Go to payments</a>
+                <a class="button-link" href="notifications.html?role=client">Go to notifications</a>
+                <a class="button-link" href="client-chatbot.html">Go to AI assistant</a>
+            </div>
         </section>
     </main>
 </body>

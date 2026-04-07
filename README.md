@@ -96,18 +96,12 @@ Key classes:
 
 
 ### Architectural Patterns
-#### Repository Pattern for database
+#### Simple Repository Pattern for database
 Persistence is separated from business logic through repository interfaces and SQLite-backed implementations.
 
-#### Lightweight MVC / Web Layer Separation
+#### Minimal MVC(Model - View - Controller)
 The backend uses controllers for HTTP handling, services for business logic, repositories/models for data, and the frontend acts as the browser-based view layer.
 
-#### Fake/Mock Retrieval-Augmented Generation (Minimal or Manual)
-The AI assistant does not query the database directly. Instead, the backend assembles platform context and available offering summaries, 
-retrieves the most relevant chunks from simple keywords, and sends only that bounded context to the Groq model.
-
-## 4. AI Customer Assistant
-The AI assistant is available from the client UI.
 
 High-level flow:
 1. The client opens `client-chatbot.html`.
@@ -176,20 +170,19 @@ EECS3311NCourseProject/
 ### Environment setup
 Create a local `.env` file in the repository root based on `.env.example`:
 
-
-### Start the system
+ 1) Start the system
 From the repository root: (EECS3311CourseProject/)
 
 ```bash or powershell
 docker compose up --build
 ```
 
-### Access the application
+ 2) Access the application
 - Frontend: `http://localhost:8081`
 - Backend API: `http://localhost:8080`
 
 
-### Stop the system
+ 3) Stop the system
 ```bash
 docker compose down
 ```
@@ -216,4 +209,4 @@ Available under `diagrams/PlantUMLs/`:
 - notifications are currently **in-memory** and are not persisted to SQLite thus, volatile
 - AI retrieval is **simple/manual faked RAG**, not vector-database-based retrieval
 - SQLite is kept instead of actual SQL server running on the Database Server
-- UI styling is minimal and **NOT** production-grade frontend systems
+- UI styling is minimal and **NOT** production level

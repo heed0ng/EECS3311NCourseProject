@@ -5,42 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Home</title>
     <link rel="stylesheet" href="css/styles.css">
-	<script src="js/common/config.js"></script>
-	<script src="js/common/api.js"></script>
-	<script src="js/common/dom.js"></script>
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
 </head>
 <body>
     <header>
         <h1>Admin Home</h1>
+        <p>Approve consultants, inspect system status, and manage platform-wide policies.</p>
         <nav>
             <a href="index.html">Portal Index</a>
             <a href="admin-consultants.html">Consultant Approvals</a>
             <a href="admin-status.html">System Status</a>
             <a href="admin-policies.html">Policies</a>
-			<a href="notifications.html?role=admin">Notifications</a>
+            <a href="notifications.html?role=admin">Notifications</a>
         </nav>
     </header>
 
     <main>
+        <section class="panel hero">
+            <span class="pill">Demo admin: admin-1</span>
+            <h2>Administration Workspace</h2>
+            <p>
+                Use this area to review consultant registration decisions, inspect platform counts,
+                and adjust cancellation, refund, pricing, and notification policies.
+            </p>
+            <div class="quick-links">
+                <a class="button-link" href="admin-consultants.html">Open approvals</a>
+                <a class="button-link" href="admin-status.html">Open system status</a>
+                <a class="button-link" href="admin-policies.html">Open policies</a>
+                <a class="button-link" href="notifications.html?role=admin">Open notifications</a>
+            </div>
+        </section>
+
         <section class="panel">
             <h2>Available Admin Workflows</h2>
-            <ul>
+            <ul class="feature-list">
                 <li>Approve or reject consultant registrations</li>
                 <li>Review platform status counts</li>
                 <li>Manage cancellation, refund, pricing, and notification policies</li>
-				<li>Review policy, consultant approval notifications</li>
+                <li>Review admin-facing consultant approval and policy update notifications</li>
             </ul>
         </section>
 
         <section class="panel">
             <h2>Quick Start</h2>
-            <p>Default demo admin: <strong>admin-1</strong></p>
-            <ul>
-                <li><a href="admin-consultants.html">Go to consultant approvals</a></li>
-                <li><a href="admin-status.html">Go to system status</a></li>
-                <li><a href="admin-policies.html">Go to policy management</a></li>
-				<li><a href="notifications.html?role=admin">Go to notifications</a></li>
-            </ul>
+            <p class="note">
+                Recommended demo flow: review pending consultants → inspect system status →
+                update one or more policies → open notifications.
+            </p>
+            <div class="quick-links">
+                <a class="button-link" href="admin-consultants.html">Go to consultant approvals</a>
+                <a class="button-link" href="admin-status.html">Go to system status</a>
+                <a class="button-link" href="admin-policies.html">Go to policy management</a>
+                <a class="button-link" href="notifications.html?role=admin">Go to notifications</a>
+            </div>
         </section>
     </main>
 </body>

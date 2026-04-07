@@ -60,7 +60,9 @@ async function apiPost(path, requestBodyObject) {
         body: JSON.stringify(requestBodyObject)
     });
 
-    return await handleApiResponse(response, "POST request failed.");
+    const responseBody = await handleApiResponse(response, "POST request failed.");
+    await refreshPopupNotificationAfterMutation();
+    return responseBody;
 }
 
 async function apiPut(path, requestBodyObject) {
@@ -72,7 +74,9 @@ async function apiPut(path, requestBodyObject) {
         body: JSON.stringify(requestBodyObject)
     });
 
-    return await handleApiResponse(response, "PUT request failed.");
+    const responseBody = await handleApiResponse(response, "PUT request failed.");
+    await refreshPopupNotificationAfterMutation();
+    return responseBody;
 }
 
 async function apiDelete(path) {
@@ -83,12 +87,21 @@ async function apiDelete(path) {
         }
     });
 
-    return await handleApiResponse(response, "DELETE request failed.");
+    const responseBody = await handleApiResponse(response, "DELETE request failed.");
+    await refreshPopupNotificationAfterMutation();
+    return responseBody;
 }
+
+window.apiGet = apiGet;
+window.apiPost = apiPost;
+window.apiPut = apiPut;
+window.apiDelete = apiDelete;
 
 document.addEventListener("DOMContentLoaded", function () {
     initializeLiveNotificationPopupPolling();
 });
+
+let liveNotificationPollingIntervalId = null;
 
 function initializeLiveNotificationPopupPolling() {
     const currentPageName = getCurrentPageName();
@@ -103,10 +116,22 @@ function initializeLiveNotificationPopupPolling() {
         return;
     }
 
-    pollLatestNotificationForPopup(role, true);
+    pollLatestNotificationForPopup(role, {
+        suppressPopup: true,
+        allowRecentInitialPopup: true,
+        forcePopupOnFirstSeen: false
+    });
 
-    window.setInterval(function () {
-        pollLatestNotificationForPopup(role, false);
+    if (liveNotificationPollingIntervalId !== null) {
+        window.clearInterval(liveNotificationPollingIntervalId);
+    }
+
+    liveNotificationPollingIntervalId = window.setInterval(function () {
+        pollLatestNotificationForPopup(role, {
+            suppressPopup: false,
+            allowRecentInitialPopup: false,
+            forcePopupOnFirstSeen: false
+        });
     }, 5000);
 }
 
@@ -161,7 +186,26 @@ function buildNotificationPopupPath(role, userId) {
     return "/api/admin/" + encodeURIComponent(userId) + "/notifications";
 }
 
-async function pollLatestNotificationForPopup(role, isInitialBaselineOnly) {
+async function refreshPopupNotificationAfterMutation() {
+    const role = inferActiveRoleFromPage(getCurrentPageName());
+
+    if (!role) {
+        return;
+    }
+
+    try {
+        await pollLatestNotificationForPopup(role, {
+            suppressPopup: false,
+            allowRecentInitialPopup: false,
+            forcePopupOnFirstSeen: true
+        });
+    } catch (error) {
+        // Keep mutation flows uninterrupted if popup refresh fails.
+    }
+}
+
+async function pollLatestNotificationForPopup(role, options) {
+    const settings = options || {};
     const userId = resolveActiveUserIdForPopup(role);
 
     if (!userId) {
@@ -181,17 +225,40 @@ async function pollLatestNotificationForPopup(role, isInitialBaselineOnly) {
 
         if (!previousEventId) {
             sessionStorage.setItem(storageKey, newestNotification.eventId);
+
+            if (settings.forcePopupOnFirstSeen || shouldShowRecentInitialPopup(newestNotification, 15000)) {
+                showPopupNotification(newestNotification);
+            }
+
             return;
         }
 
         if (previousEventId !== newestNotification.eventId) {
             sessionStorage.setItem(storageKey, newestNotification.eventId);
 
-            if (!isInitialBaselineOnly) {
-                window.alert("New notification:\n" + (newestNotification.message || ""));
+            if (!settings.suppressPopup) {
+                showPopupNotification(newestNotification);
             }
         }
     } catch (error) {
-        // No error popping so that it won't cause any interruption in the demo/flow
     }
+}
+
+function shouldShowRecentInitialPopup(notification, maxAgeMilliseconds) {
+    if (!notification || !notification.occurredAt) {
+        return false;
+    }
+
+    const occurredAtTime = Date.parse(notification.occurredAt);
+
+    if (Number.isNaN(occurredAtTime)) {
+        return false;
+    }
+
+    const ageMilliseconds = Date.now() - occurredAtTime;
+    return ageMilliseconds >= 0 && ageMilliseconds <= maxAgeMilliseconds;
+}
+
+function showPopupNotification(notification) {
+    window.alert("New notification:\n" + (notification.message || ""));
 }

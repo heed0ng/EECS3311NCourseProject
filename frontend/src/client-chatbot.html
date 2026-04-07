@@ -5,57 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Client - AI Assistant</title>
     <link rel="stylesheet" href="css/styles.css">
-	<script src="js/common/config.js"></script>
-	<script src="js/common/api.js"></script>
-	<script src="js/common/dom.js"></script>
-	<script src="js/client/client-chatbot.js"></script>
+    <script src="js/common/config.js"></script>
+    <script src="js/common/api.js"></script>
+    <script src="js/common/dom.js"></script>
+    <script src="js/client/client-chatbot.js"></script>
 </head>
 <body>
     <header>
         <h1>Client - AI Assistant</h1>
+        <p>Ask general questions about services, booking flow, payment methods, and public platform policies.</p>
         <nav>
             <a href="client-home.html">Client Home</a>
             <a href="client-services.html">Browse Services</a>
             <a href="client-bookings.html">My Bookings</a>
             <a href="client-payment-methods.html">Payment Methods</a>
             <a href="client-payments.html">Payments</a>
+            <a href="notifications.html?role=client">Notifications</a>
         </nav>
     </header>
 
-    <main>
-        <section class="panel">
-            <h2>Ask a Platform Question</h2>
-
+    <main class="two-col-layout">
+        <section class="panel hero">
+            <span class="pill">AI Customer Assistant</span>
+            <h2>Ask a platform question</h2>
             <p>
-                This assistant currently answers general platform questions only.
-                It does not access private client booking or payment details.
+                This assistant answers general platform questions only. It does not access private
+                booking history, saved payment methods, or personal payment details.
             </p>
 
-            <div>
-                <label for="assistant-question-input">Question:</label>
+            <div class="actions-row">
+                <a class="button-link" href="client-services.html">Browse services first</a>
+                <a class="button-link" href="client-bookings.html">Open bookings</a>
             </div>
-            <div>
-                <textarea id="assistant-question-input" rows="6" cols="80"
+
+            <div style="margin-top: 22px;">
+                <label for="assistant-question-input">Question</label>
+                <textarea
+                    id="assistant-question-input"
+                    rows="7"
                     placeholder="Example: How do I book a consulting session?"></textarea>
+                <button id="ask-assistant-button">Ask Assistant</button>
+                <p id="assistant-message"></p>
             </div>
-
-            <button id="ask-assistant-button">Ask Assistant</button>
-            <p id="assistant-message"></p>
         </section>
 
-        <section class="panel">
-            <h2>Assistant Answer</h2>
-            <pre id="assistant-answer-output"></pre>
-        </section>
-
-        <section class="panel">
+        <aside class="panel">
             <h2>Example Questions</h2>
-            <ul>
+            <ul class="clean-list">
                 <li>How do I book a consulting session?</li>
                 <li>What payment methods are accepted?</li>
                 <li>What services are available?</li>
                 <li>Can I cancel my booking?</li>
+                <li>What happens after a consultant accepts my request?</li>
             </ul>
+
+            <h2 style="margin-top: 22px;">Scope</h2>
+            <p class="muted">
+                The chatbot is informational only. It explains platform workflows and public service
+                information, but it does not perform actions for the user.
+            </p>
+        </aside>
+
+        <section class="panel" style="grid-column: 1 / -1;">
+            <h2>Assistant Answer</h2>
+            <pre id="assistant-answer-output">Your answer will appear here.</pre>
         </section>
     </main>
 </body>
