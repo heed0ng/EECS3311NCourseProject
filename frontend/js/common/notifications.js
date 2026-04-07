@@ -53,7 +53,7 @@ function updateRoleHelpText() {
     if (role === "client") {
         setText(
             "notification-role-help",
-            "Client feed includes booking requested, accepted, rejected, cancelled, payment processed, and policy update events."
+            "Client feed includes booking requested, accepted, rejected, cancelled,and  payment processed events."
         );
         return;
     }

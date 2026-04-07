@@ -2,6 +2,7 @@ package backend.api.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +43,7 @@ public class NotificationController {
             this.clientRepository.findById(clientId)
                     .orElseThrow(() -> new EntityNotFoundException("Client not found."));
 
-            return ResponseEntity.ok(this.buildResponsesForAudience("client"));
+            return ResponseEntity.ok(this.buildResponses(event -> this.supportsClient(clientId, event)));
 
         } catch (Exception exception) {
             return ResponseEntity.badRequest().body(
@@ -56,7 +57,7 @@ public class NotificationController {
             this.consultantRepository.findById(consultantId)
                     .orElseThrow(() -> new EntityNotFoundException("Consultant not found."));
 
-            return ResponseEntity.ok(this.buildResponsesForAudience("consultant"));
+            return ResponseEntity.ok(this.buildResponses(event -> this.supportsConsultant(consultantId, event)));
 
         } catch (Exception exception) {
             return ResponseEntity.badRequest().body(
@@ -70,7 +71,7 @@ public class NotificationController {
             this.adminRepository.findById(adminId)
                     .orElseThrow(() -> new EntityNotFoundException("Admin not found."));
 
-            return ResponseEntity.ok(this.buildResponsesForAudience("admin"));
+            return ResponseEntity.ok(this.buildResponses(event -> this.supportsAdmin(adminId, event)));
 
         } catch (Exception exception) {
             return ResponseEntity.badRequest().body(
@@ -78,14 +79,14 @@ public class NotificationController {
         }
     }
 
-    private List<NotificationEventResponse> buildResponsesForAudience(String audience) {
+    private List<NotificationEventResponse> buildResponses(Predicate<DomainEvent> predicate) {
         List<DomainEvent> publishedEvents = this.eventPublisher.getPublishedEvents();
         List<NotificationEventResponse> responses = new ArrayList<>();
 
         for (int index = publishedEvents.size() - 1; index >= 0; index--) {
             DomainEvent currentEvent = publishedEvents.get(index);
 
-            if (this.supportsAudience(audience, currentEvent)) {
+            if (predicate.test(currentEvent)) {
                 responses.add(new NotificationEventResponse(
                         currentEvent.getEventId(),
                         currentEvent.getOccurredAt().toString(),
@@ -97,20 +98,40 @@ public class NotificationController {
         return responses;
     }
 
-private boolean supportsAudience(String audience, DomainEvent event) {
-    String eventType = event.getEventType();
+    private boolean supportsClient(String clientId, DomainEvent event) {
+        String eventType = event.getEventType();
 
-    switch (audience) {
-        case "client": return "BookingAccepted".equals(eventType) || "BookingRejected".equals(eventType)
-                    || "BookingCancelled".equals(eventType) || "PaymentProcessed".equals(eventType)
-                    || "BookingRequested".equals(eventType);
+        if (!("BookingAccepted".equals(eventType)
+                || "BookingRejected".equals(eventType)
+                || "BookingCancelled".equals(eventType)
+                || "PaymentProcessed".equals(eventType)
+                || "BookingRequested".equals(eventType))) {
+            return false;
+        }
 
-        case "consultant": return "BookingRequested".equals(eventType) || "BookingCancelled".equals(eventType)
-                    || "PaymentProcessed".equals(eventType) || "PolicyUpdated".equals(eventType);
-
-        case "admin":  return "ConsultantApproval".equals(eventType) || "PolicyUpdated".equals(eventType);
-
-        default: return false;
+        return event.getClientId() == null || event.getClientId().equals(clientId);
     }
-}
+
+    private boolean supportsConsultant(String consultantId, DomainEvent event) {
+        String eventType = event.getEventType();
+
+        if (!("BookingRequested".equals(eventType)
+                || "BookingCancelled".equals(eventType)
+                || "PaymentProcessed".equals(eventType)
+                || "PolicyUpdated".equals(eventType))) {
+            return false;
+        }
+
+        return event.getConsultantId() == null || event.getConsultantId().equals(consultantId);
+    }
+
+    private boolean supportsAdmin(String adminId, DomainEvent event) {
+        String eventType = event.getEventType();
+
+        if (!("ConsultantApproval".equals(eventType) || "PolicyUpdated".equals(eventType))) {
+            return false;
+        }
+
+        return event.getAdminId() == null || event.getAdminId().equals(adminId);
+    }
 }

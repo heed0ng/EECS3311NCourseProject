@@ -67,8 +67,9 @@ public class DefaultBookingService implements BookingService {
         if (!slot.isOwnedBy(offering.getConsultant().getUserId())) throw new BusinessRuleViolationException("Slot does not belong to the selected consultant.");
 
         LocalDateTime now = LocalDateTime.now();
+        if (!slot.getStartDateTime().isAfter(now)) throw new BusinessRuleViolationException("Selected slot is in the past or has already started.");
         String bookingId = this.idGenerator.nextId("bookings", "booking_id", "booking");
-
+        
         Booking booking = new Booking(bookingId, client, offering, slot, new RequestedState(), now, now, offering.getEffectivePrice());
         
         slot.setAvailable(false);
@@ -200,7 +201,7 @@ public class DefaultBookingService implements BookingService {
         NotificationPolicy policy = this.policyRepository.getNotificationPolicy();
         if (policy.isNotifyOnBookingRequested()) {
             this.eventPublisher.publish(new BookingRequestedEvent(this.eventPublisher.nextEventId(), LocalDateTime.now(),
-                            "Booking requested by " + booking.getClient().getName() + " for service " + booking.getOffering().getConsultingService().getName()+ "."));
+                            "Booking requested by " + booking.getClient().getName() + " for service " + booking.getOffering().getConsultingService().getName()+ ".", booking.getClient().getUserId(), booking.getOffering().getConsultant().getUserId(), null));
         }
     }
 
@@ -208,7 +209,7 @@ public class DefaultBookingService implements BookingService {
         NotificationPolicy policy = this.policyRepository.getNotificationPolicy();
         if (policy.isNotifyOnBookingCancelled()) {
             this.eventPublisher.publish(new BookingCancelledEvent(this.eventPublisher.nextEventId(), LocalDateTime.now(),
-                            "Booking " + booking.getBookingId() + " was cancelled. Refund amount: $" + String.format("%.2f", refundAmount)));
+                            "Booking " + booking.getBookingId() + " was cancelled. Refund amount: $" + String.format("%.2f", refundAmount), booking.getClient().getUserId(), booking.getOffering().getConsultant().getUserId(), null));
         }
     }
 }

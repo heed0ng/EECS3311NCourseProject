@@ -38,7 +38,7 @@ public class TerminalUI {
     private final AdminRepository adminRepository;
 
     public TerminalUI() {
-        String databaseFilePath = System.getProperty("user.dir") + "/booking_platform_phase1.db";
+    	String databaseFilePath = DatabasePaths.databaseFilePath();
         this.databaseManager = new DatabaseManager(databaseFilePath);
         new SchemaInitializer(databaseManager).initialize();
         this.eventPublisher = new EventPublisher();
@@ -79,7 +79,7 @@ public class TerminalUI {
         seedDemoDataIfNeeded();
         subscribeDefaultObservers();
         System.out.println("Service Booking and Consulting Platform - Phase 1 Backend Demo");
-        System.out.println("Database file: booking_platform_phase1.db");
+        System.out.println("Database file: " + DatabasePaths.DATABASE_FILE_NAME);
         printDemoIds();
         while (true) {
             System.out.println("\nMain Menu");

@@ -123,7 +123,7 @@ public class DefaultPaymentService implements PaymentService {
 
         if (policyRepository.getNotificationPolicy().isNotifyOnPaymentProcessed()) {
             this.eventPublisher.publish(new PaymentProcessedEvent(this.eventPublisher.nextEventId(), LocalDateTime.now(),
-                    "Payment processed successfully for booking " + booking.getBookingId() + "."));
+                    "Payment processed successfully for booking " + booking.getBookingId() + ".", booking.getClient().getUserId(), booking.getOffering().getConsultant().getUserId(), null));
         }
         return transactionToSave;
     }

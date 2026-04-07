@@ -56,7 +56,8 @@ public class DefaultClientAssistantService implements ClientAssistantService {
             }
         } catch (Exception e) {
         	    e.printStackTrace();
-        	    return "Groq call failed: " + e.getMessage();
+        	    System.out.println("Groq call failed: " + e.getMessage() + "Answering with pre-defined messagesds.");
+        	    return this.answerQuestionLocally(normalizedQuestion);
         }
 
         return this.answerQuestionLocally(normalizedQuestion);

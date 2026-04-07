@@ -1,4 +1,4 @@
-package backend.config;
+package backend.util;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +21,7 @@ public class ApplicationConfig {
 
     @Bean
     public DatabaseManager databaseManager() {
-        String databaseFilePath = System.getProperty("user.dir") + "/booking_platform_phase1.db";
+    		String databaseFilePath = DatabasePaths.databaseFilePath();
         DatabaseManager databaseManager = new DatabaseManager(databaseFilePath);
         new SchemaInitializer(databaseManager).initialize();
         return databaseManager;
@@ -185,36 +185,30 @@ public class ApplicationConfig {
                 groqChatClient);
     }
     
-    @Bean
-    public CommandLineRunner initializeDemoDataAndObservers(
-            EventPublisher eventPublisher,
-            AdminRepository adminRepository,
-            ClientRepository clientRepository,
-            ConsultantRepository consultantRepository) {
+@Bean
+public CommandLineRunner initializeDemoDataAndObservers(
+        EventPublisher eventPublisher,
+        AdminRepository adminRepository,
+        ClientRepository clientRepository,
+        ConsultantRepository consultantRepository) {
 
-        return args -> {
-            TerminalUI terminalUI = new TerminalUI();
-            terminalUI.seedDemoDataIfNeeded();
+    return args -> {
+        TerminalUI terminalUI = new TerminalUI();
+        terminalUI.seedDemoDataIfNeeded();
 
-            for (var currentConsultant : consultantRepository.findAll()) {
-                eventPublisher.subscribe(new ConsultantObserver(
-                        "observer-consultant-" + currentConsultant.getUserId(),
-                        currentConsultant.getName()));
-            }
+        for (var currentConsultant : consultantRepository.findAll()) {
+            eventPublisher.subscribe(new ConsultantObserver("observer-consultant-" + currentConsultant.getUserId(), currentConsultant.getName()));
+        }
 
-            for (var currentClient : clientRepository.findAll()) {
-                eventPublisher.subscribe(new ClientObserver(
-                        "observer-client-" + currentClient.getUserId(),
-                        currentClient.getName()));
-            }
+        for (var currentClient : clientRepository.findAll()) {
+            eventPublisher.subscribe(new ClientObserver("observer-client-" + currentClient.getUserId(), currentClient.getName()));
+        }
 
-            for (var currentAdmin : adminRepository.findAll()) {
-                eventPublisher.subscribe(new AdminObserver(
-                        "observer-admin-" + currentAdmin.getUserId(),
-                        currentAdmin.getName()));
-            }
-        };
-    }
+        for (var currentAdmin : adminRepository.findAll()) {
+            eventPublisher.subscribe(new AdminObserver("observer-admin-" + currentAdmin.getUserId(), currentAdmin.getName()));
+        }
+    };
+}
     
     @Bean
     public GroqChatClient groqChatClient() {

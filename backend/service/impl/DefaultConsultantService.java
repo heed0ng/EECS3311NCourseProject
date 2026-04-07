@@ -159,8 +159,8 @@ public class DefaultConsultantService implements ConsultantService {
 
         if (policyRepository.getNotificationPolicy().isNotifyOnBookingAccepted()) {
             this.eventPublisher.publish(
-                new BookingAcceptedEvent(eventPublisher.nextEventId(), LocalDateTime.now(),"Booking " + booking.getBookingId() + 
-                		" was accepted and moved to pending payment."));
+                new BookingAcceptedEvent(eventPublisher.nextEventId(), LocalDateTime.now(),"Booking " + booking.getBookingId() +
+                        " was accepted and moved to pending payment.", booking.getClient().getUserId(), booking.getOffering().getConsultant().getUserId(), null));
         }
         return booking;
     }
@@ -176,7 +176,7 @@ public class DefaultConsultantService implements ConsultantService {
 
         if (policyRepository.getNotificationPolicy().isNotifyOnBookingRejected()) {
             eventPublisher.publish(new BookingRejectedEvent(eventPublisher.nextEventId(), LocalDateTime.now(),
-                    "Booking " + booking.getBookingId() + " was rejected by the consultant."));
+                    "Booking " + booking.getBookingId() + " was rejected by the consultant.", booking.getClient().getUserId(), booking.getOffering().getConsultant().getUserId(), null));
         }
         return booking;
     }
