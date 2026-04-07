@@ -1,160 +1,219 @@
-# Service Booking and Consulting Platform – Phase 1
+# Service Booking and Consulting Platform — Phase 2
 
-## Overview ##
-This project implements the Phase 1 backend of a Service Booking and Consulting Platform for EECS3311 Group Project
+**Course:** EECS 3311 Software Design  
+**Repository:** https://github.com/heed0ng/EECS3311NCourseProject  
+**Author:** Heedong Yang  
 
-The project supports:
-- Browsing consulting services
-- Requesting and managing bookings
-- Consultant availability and booking decisions
-- Simulated payment processing
-- Simple broadcasted notification
-- Single admin policy and consultant approval management
+## 1. Project Overview
+This project implements a **Service Booking and Consulting Platform** for the EECS3311 course project.
 
+Phase 2 extends the Phase 1 backend by adding:
+- completed browser-based frontend pages for all three players (**client, consultant, admin**)
+- a **Docker-based deployment** using separate backend, frontend, and data containers
+- **AI customer assistant** that answers general platform questions through a backend API
 
+The system supports the following major workflows:
+- browse consulting services and available offerings
+- request, accept, reject, cancel, and complete bookings and reviewing features
+- manage consultant availability and service offerings
+- process (simulated)payments, manage saved payment methods and review. 
+- manage basic system policies
+- view notifications
+- ask the AI assistant general platform questions
 
-## Implemented GoF Design Patterns ##
+## 2. Architecture Summary
+The project follows a layered structure.
 
-### State Pattern
+### Backend (`backend/src`)
+- **`api`**: REST controllers, request/response DTOs, and DTO mappers
+- **`service` / `service.impl`**: business logic for booking, consultant, payment, admin, and assistant workflows
+- **`repository` / `repository.sqlite`**: persistence interfaces and SQLite implementations
+- **`model`**: domain entities for bookings, users, policies, payments, and notification events
+- **`state`**: booking lifecycle states
+- **`paymentStrategy`**: payment-method-specific validation/processing strategies
+- **`observer`**: event publishing and notification observers
+- **`ai`**: Groq API client used by the AI assistant
+- **`util`**: configuration, enums, and utility exceptions
 
+### Frontend (`frontend/src`)
+- static HTML pages for each role
+- shared CSS in `css/styles.css`
+- role-specific JavaScript in `js/client`, `js/consultant`, and `js/admin`
+- shared JavaScript utilities in `js/common`
+
+### Deployment
+Docker Compose starts three services:
+- **backend**: Spring Boot API
+- **frontend**: Nginx serving static files(HTML/CSS/JS)
+- **database**: Container holding persisted SQLite volume
+
+## 3. Design Patterns Used
+### GoF Patterns
+#### State Pattern
 Used for the booking lifecycle.
-Flow can be:
-- Requested - Rejected
-- Requested - Confirmed - PendingPayment - Paid - (Consultant mark) - Completed
-- Requested - Cancelled by client at any time unless:
---> Deadline passed(24 hours default, for now hard coded)
---> Booking StartTime passed
+
+Key classes:
+- `backend.model.core.Booking`
+- `backend.state.BookingState`
+- `backend.state.RequestedState`
+- `backend.state.ConfirmedState`
+- `backend.state.PendingPaymentState`
+- `backend.state.PaidState`
+- `backend.state.RejectedState`
+- `backend.state.CancelledState`
+- `backend.state.CompletedState`
 
 
-Main context:
-- `model.core.Booking`
+#### Strategy Pattern
+Used for payment-method-specific handling.
 
-States:
-- `state.RequestedState`
-- `state.ConfirmedState`
-- `state.PendingPaymentState`
-- `state.PaidState`
-- `state.RejectedState`
-- `state.CancelledState`
-- `state.CompletedState`
-
-
-### Strategy Pattern
-Used for payment processing.
-
-Strategy interface:
-- `payment.PaymentMethodStrategy`
-
-Concrete strategies:
-- `payment.CreditCardPaymentStrategy`
-- `payment.DebitCardPaymentStrategy`
-- `payment.PayPalPaymentStrategy`
-- `payment.BankTransferPaymentStrategy`
-
-Factory:
-- `payment.PaymentStrategyFactory`
+Key classes:
+- `backend.paymentStrategy.PaymentMethodStrategy`
+- `backend.paymentStrategy.CreditCardPaymentStrategy`
+- `backend.paymentStrategy.DebitCardPaymentStrategy`
+- `backend.paymentStrategy.PayPalPaymentStrategy`
+- `backend.paymentStrategy.BankTransferPaymentStrategy`
+- `backend.paymentStrategy.PaymentStrategyFactory`
 
 
-### Observer Pattern
-Used for notification and event publishing.
+#### Observer Pattern
+Used for notification/event publishing.
 
-Publisher:
-- `observer.EventPublisher`
-
-Observer interface:
-- `observer.Observer`
-
-Concrete observers:
-- `observer.ClientObserver`
-- `observer.ConsultantObserver`
-- `observer.AdminObserver`
-
-Event hierarchy:
-- `model.notification.DomainEvent`
-- `model.notification.BookingRequestedEvent`
-- `model.notification.BookingAcceptedEvent`
-- `model.notification.BookingRejectedEvent`
-- `model.notification.BookingCancelledEvent`
-- `model.notification.PaymentProcessedEvent`
-- `model.notification.ConsultantApprovalEvent`
+Key classes:
+- `backend.observer.EventPublisher`
+- `backend.observer.Observer`
+- `backend.observer.ClientObserver`
+- `backend.observer.ConsultantObserver`
+- `backend.observer.AdminObserver`
+- `backend.model.notification.DomainEvent`
+- `backend.model.notification.BookingAcceptedEvent`
+- `backend.model.notification.BookingRejectedEvent`
+- `backend.model.notification.BookingCancelledEvent`
+- `backend.model.notification.BookingCompletedEvent`
+- `backend.model.notification.ConsultantApprovalEvent`
+- `backend.model.notification.PaymentProcessedEvent`
+- `backend.model.notification.PolicyUpdatedEvent`
 
 
-## Repository Pattern
-Repository is used as one additional architectural pattern to separate DB logic from business logic.
+### Architectural Patterns
+#### Repository Pattern for database
+Persistence is separated from business logic through repository interfaces and SQLite-backed implementations.
 
-Repository interfaces include:
-- `repository.BookingRepository`
-- `repository.ClientRepository`
-- `repository.ConsultantRepository`
-- `repository.AvailabilitySlotRepository`
-- `repository.ConsultantServiceOfferingRepository`
-- `repository.ConsultingServiceRepository`
-- `repository.SavedPaymentMethodRepository`
-- `repository.PaymentTransactionRepository`
-- `repository.PolicyRepository`
+#### Lightweight MVC / Web Layer Separation
+The backend uses controllers for HTTP handling, services for business logic, repositories/models for data, and the frontend acts as the browser-based view layer.
 
-SQLite implementations are under:
-- `repository.sqlite`
+#### Fake/Mock Retrieval-Augmented Generation (Minimal or Manual)
+The AI assistant does not query the database directly. Instead, the backend assembles platform context and available offering summaries, 
+retrieves the most relevant chunks from simple keywords, and sends only that bounded context to the Groq model.
 
+## 4. AI Customer Assistant
+The AI assistant is available from the client UI.
 
-## Package Structure
-Main packages:
-- model
--> `model.core`
--> `model.user`
--> `model.payment`
--> `model.policy`
--> `model.notification`
-
-- `service`
--> `service.impl`
-
-- `repository`
--> `repository.sqlite`
-
-- `payment`
-- `state`
-- `observer`
-- `ui`
-- `util`: Only for storing enums
+High-level flow:
+1. The client opens `client-chatbot.html`.
+2. Frontend JavaScript posts the user question to `/api/client/assistant/question`.
+3. `ClientAssistantController` passes the question to `ClientAssistantService`.
+4. `DefaultClientAssistantService` builds general platform knowledge chunks and current public offering summaries.
+5. Relevant chunks are selected with a simple keyword-based retrieval step.
+6. The backend sends a system prompt + retrieved context + user question to `GroqChatClient`.
+7. The assistant returns a response.
+8. If the model is unavailable, service falls back to predefined answers.
 
 
-## How to Run
-1. Open the project in Eclipse.
-2. Ensure the SQLite JDBC library is available in the build path.
-3. Run:
-   - `ui.TerminalUI`
-4. Follow the terminal menu to demonstrate Phase 1 use cases.
+## 5. Main Features Implemented
+
+### Client
+- browse services / offerings
+- load available slots
+- request booking
+- view booking history
+- cancel booking
+- manage payment methods
+- process payment
+- view payment history
+- ask AI assistant questions
 
 
-## UML Diagrams
-Diagrams are included in:
-
-`docs/diagrams/`
-
-
-Included diagrams:
-- use case diagram
-
-- backend overview diagram
-- (partial)backend GoF-pattern-focused class diagram
-- (partial)package diagrams
+### Consultant
+- add/update/remove availability slot
+- add/remove service offering
+- review pending booking requests
+- accept/reject booking request
+- view schedule
+- complete booking
 
 
-## Notes
-- For now,(0329) Phase 1 backend-focused implementation.
-- Notifications are simplified for Phase 1.
-- SQLite is used for persistence.
-
-## Clarification
-Backend is a plain Java source project using SQLite JDBC.
-Before running in Eclipse, add the SQLite JDBC dependency to the build path.
-
-## GitHub Repository
-https://github.com/heed0ng/ServiceBookingAndConsultingPlatform_Phase1
+### Admin
+- approve/reject consultant registrations
+- update cancellation, refund, pricing, and notification policies
+- view system status
 
 
-## Author
-Heedong Yang
-EECS3311N Software Design 26 Winter
-York University
+## 6. Project tree
+```text
+EECS3311NCourseProject/
+├── backend/
+│   ├── Dockerfile
+│   ├── pom.xml
+│   └── src/
+├── frontend/
+│   ├── Dockerfile
+│   └── src/
+├── diagrams/
+│   ├── *.png
+│   └── PlantUMLs/
+├── docker-compose.yml
+├── .env.example
+├── .gitignore
+└── README.md
+```
+
+
+## 7. How to Run with Docker
+### Requirements
+- Docker Desktop installed and running
+
+### Environment setup
+Create a local `.env` file in the repository root based on `.env.example`:
+
+
+### Start the system
+From the repository root: (EECS3311CourseProject/)
+
+```bash or powershell
+docker compose up --build
+```
+
+### Access the application
+- Frontend: `http://localhost:8081`
+- Backend API: `http://localhost:8080`
+
+
+### Stop the system
+```bash
+docker compose down
+```
+
+
+## 8. Diagrams
+The repository includes the use case diagrams and class diagram with both comprehensive 
+and simplified package focused diagrams and their PlantUML sources.
+
+Available under `diagrams/`:
+- `UseCaseDiagrm.png`
+- `classDiagram.png`
+- `classDiagram_backend.png`
+- `packageDiagram[Helper].png`
+
+Available under `diagrams/PlantUMLs/`:
+- `UseCaseDiagrm.puml`
+- `classDiagram.puml`
+- `classDiagram_backend.puml`
+- `packageDiagram[Helper].puml`
+
+## 9.  Limitations
+
+- notifications are currently **in-memory** and are not persisted to SQLite thus, volatile
+- AI retrieval is **simple/manual faked RAG**, not vector-database-based retrieval
+- SQLite is kept instead of actual SQL server running on the Database Server
+- UI styling is minimal and **NOT** production-grade frontend systems
