@@ -1,0 +1,38 @@
+services:
+  database:
+    image: alpine:3.20
+    container_name: sbcp-database
+    command: >
+      sh -c "mkdir -p /data &&
+             touch /data/booking_platform.db &&
+             tail -f /dev/null"
+    volumes:
+      - sqlite_data:/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: sbcp-backend
+    depends_on:
+      - database
+    environment:
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GROQ_MODEL: ${GROQ_MODEL}
+    ports:
+      - "8080:8080"
+    volumes:
+      - sqlite_data:/data
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: sbcp-frontend
+    depends_on:
+      - backend
+    ports:
+      - "8081:80"
+
+volumes:
+  sqlite_data:

@@ -1,6 +1,6 @@
-package state;
+package backend.state;
 
-import model.core.Booking;
+import backend.model.core.Booking;
 
 public interface BookingState {
     void confirm(Booking booking);

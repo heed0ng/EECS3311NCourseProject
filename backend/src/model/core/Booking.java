@@ -1,9 +1,9 @@
-package model.core;
+package backend.model.core;
 
 import java.time.LocalDateTime;
 
-import model.user.Client;
-import state.BookingState;
+import backend.model.user.Client;
+import backend.state.BookingState;
 
 public class Booking {
     private final String bookingId;
@@ -13,10 +13,10 @@ public class Booking {
     private BookingState state;
     private final LocalDateTime createdAt;
     private LocalDateTime lastUpdatedAt;
-    private final double agreedPrice;
+    private final double price;
 
     public Booking(String bookingId, Client client, ConsultantServiceOffering offering, AvailabilitySlot slot,
-            BookingState initialState, LocalDateTime createdAt, LocalDateTime lastUpdatedAt, double agreedPrice) {
+            BookingState initialState, LocalDateTime createdAt, LocalDateTime lastUpdatedAt, double price) {
         this.bookingId = bookingId;
         this.client = client;
         this.offering = offering;
@@ -24,7 +24,7 @@ public class Booking {
         this.state = initialState;
         this.createdAt = createdAt;
         this.lastUpdatedAt = lastUpdatedAt;
-        this.agreedPrice = agreedPrice;
+        this.price = price;
     }
 
     public String getBookingId() { return this.bookingId; }
@@ -35,7 +35,7 @@ public class Booking {
     public String getStateName() { return this.state.getName(); }
     public LocalDateTime getCreatedAt() { return this.createdAt; }
     public LocalDateTime getLastUpdatedAt() { return this.lastUpdatedAt; }
-    public double getAgreedPrice() { return this.agreedPrice; }
+    public double getPrice() { return this.price; }
 
     public void setState(BookingState state) {
         this.state = state;

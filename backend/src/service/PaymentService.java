@@ -1,10 +1,9 @@
-package service;
+package backend.service;
 
 import java.util.List;
 
-import model.payment.PaymentTransaction;
-import model.payment.SavedPaymentMethod;
-import util.PaymentMethodType;
+import backend.model.payment.*;
+import backend.util.PaymentMethodType;
 
 public interface PaymentService {
     SavedPaymentMethod addSavedPaymentMethod(String clientId, PaymentMethodType methodType, String displayLabel,

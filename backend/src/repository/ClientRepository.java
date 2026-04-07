@@ -1,9 +1,9 @@
-package repository;
+package backend.repository;
 
 import java.util.List;
 import java.util.Optional;
 
-import model.user.Client;
+import backend.model.user.Client;
 
 public interface ClientRepository {
     Optional<Client> findById(String clientId);

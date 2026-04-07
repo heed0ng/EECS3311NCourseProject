@@ -1,9 +1,9 @@
-package repository;
+package backend.repository;
 
 import java.util.List;
 import java.util.Optional;
 
-import model.payment.SavedPaymentMethod;
+import backend.model.payment.SavedPaymentMethod;
 
 public interface SavedPaymentMethodRepository {
     Optional<SavedPaymentMethod> findById(String savedMethodId);

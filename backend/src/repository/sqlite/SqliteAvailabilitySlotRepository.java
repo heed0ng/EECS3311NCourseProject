@@ -1,4 +1,4 @@
-package repository.sqlite;
+package backend.repository.sqlite;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import model.core.AvailabilitySlot;
-import model.user.Consultant;
-import repository.AvailabilitySlotRepository;
-import util.ConsultantApprovalStatus;
+import backend.model.core.AvailabilitySlot;
+import backend.model.user.Consultant;
+import backend.repository.AvailabilitySlotRepository;
+import backend.util.ConsultantApprovalStatus;
 
 public class SqliteAvailabilitySlotRepository implements AvailabilitySlotRepository {
     private final DatabaseManager databaseManager;
@@ -36,15 +36,21 @@ public class SqliteAvailabilitySlotRepository implements AvailabilitySlotReposit
 
     @Override
     public List<AvailabilitySlot> findAvailableByConsultant(String consultantId) {
-        return this.findMany(baseSql() + " WHERE a.consultant_id = ? AND a.available = 1 AND c.approval_status = 'APPROVED' ORDER BY a.start_datetime", consultantId);
+        return this.findAvailableMany(
+                baseSql() + " WHERE a.consultant_id = ? AND a.available = 1 AND c.approval_status = 'APPROVED' AND a.start_datetime > ? ORDER BY a.start_datetime",
+                consultantId);
     }
+
     @Override
     public List<AvailabilitySlot> findByConsultant(String consultantId) {
         return this.findMany(baseSql() + " WHERE a.consultant_id = ? ORDER BY a.start_datetime", consultantId);
     }
+
     @Override
     public List<AvailabilitySlot> findAllAvailable() {
-        return this.findMany(baseSql() + " WHERE a.available = 1 AND c.approval_status = 'APPROVED' ORDER BY a.start_datetime", null);
+        return this.findAvailableMany(
+                baseSql() + " WHERE a.available = 1 AND c.approval_status = 'APPROVED' AND a.start_datetime > ? ORDER BY a.start_datetime",
+                null);
     }
 
     @Override
@@ -79,8 +85,33 @@ public class SqliteAvailabilitySlotRepository implements AvailabilitySlotReposit
         }
     }
 
+    private List<AvailabilitySlot> findAvailableMany(String sql, String consultantId) {
+        try (Connection c = databaseManager.getConnection(); PreparedStatement s = c.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            if (consultantId != null) s.setString(parameterIndex++, consultantId);
+            s.setString(parameterIndex, LocalDateTime.now().toString());
+
+            try (ResultSet rs = s.executeQuery()) {
+                List<AvailabilitySlot> list = new ArrayList<>();
+                while (rs.next()) list.add(map(rs));
+                return list;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to read slots.", e);
+        }
+    }
+
     private AvailabilitySlot map(ResultSet rs) throws Exception {
-        Consultant consultant = new Consultant(rs.getString("consultant_id"), rs.getString("consultant_name"), rs.getString("consultant_email"), ConsultantApprovalStatus.valueOf(rs.getString("approval_status")));
-        return new AvailabilitySlot(rs.getString("slot_id"), consultant, LocalDateTime.parse(rs.getString("start_datetime")), LocalDateTime.parse(rs.getString("end_datetime")), rs.getInt("available") == 1);
+        Consultant consultant = new Consultant(
+                rs.getString("consultant_id"),
+                rs.getString("consultant_name"),
+                rs.getString("consultant_email"),
+                ConsultantApprovalStatus.valueOf(rs.getString("approval_status")));
+        return new AvailabilitySlot(
+                rs.getString("slot_id"),
+                consultant,
+                LocalDateTime.parse(rs.getString("start_datetime")),
+                LocalDateTime.parse(rs.getString("end_datetime")),
+                rs.getInt("available") == 1);
     }
 }

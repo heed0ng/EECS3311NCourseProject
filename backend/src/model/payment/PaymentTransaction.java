@@ -1,12 +1,12 @@
-package model.payment;
+package backend.model.payment;
 
 import java.time.LocalDateTime;
 
-import model.core.Booking;
-import model.user.Client;
-import util.PaymentMethodType;
-import util.PaymentTransactionStatus;
-import util.PaymentTransactionType;
+import backend.model.core.Booking;
+import backend.model.user.Client;
+import backend.util.PaymentMethodType;
+import backend.util.PaymentTransactionStatus;
+import backend.util.PaymentTransactionType;
 
 public class PaymentTransaction {
     private final String transactionId;

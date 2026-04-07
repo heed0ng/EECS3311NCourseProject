@@ -1,4 +1,4 @@
-package repository.sqlite;
+package backend.repository.sqlite;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,22 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import model.core.AvailabilitySlot;
-import model.core.Booking;
-import model.core.ConsultantServiceOffering;
-import model.core.ConsultingService;
-import model.user.Client;
-import model.user.Consultant;
-import repository.BookingRepository;
-import state.BookingState;
-import state.CancelledState;
-import state.CompletedState;
-import state.ConfirmedState;
-import state.PaidState;
-import state.PendingPaymentState;
-import state.RejectedState;
-import state.RequestedState;
-import util.ConsultantApprovalStatus;
+import backend.model.core.*;
+import backend.model.user.Client;
+import backend.model.user.Consultant;
+import backend.repository.BookingRepository;
+import backend.state.*;
+import backend.util.ConsultantApprovalStatus;
 
 public class SqliteBookingRepository implements BookingRepository {
     private final DatabaseManager databaseManager;
@@ -67,6 +57,27 @@ public class SqliteBookingRepository implements BookingRepository {
     }
 
     @Override
+    public boolean hasNonTerminalBookingForSlot(String slotId) {
+        String sql =
+                "SELECT COUNT(*) " +
+                "FROM bookings " +
+                "WHERE slot_id = ? " +
+                "AND state_name IN ('Requested', 'Confirmed', 'Pending Payment', 'Paid')";
+
+        try (Connection c = databaseManager.getConnection();
+             PreparedStatement s = c.prepareStatement(sql)) {
+
+            s.setString(1, slotId);
+
+            try (ResultSet rs = s.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to check slot booking usage.", e);
+        }
+    }
+    
+    @Override
     public void save(Booking booking) {
         String sql = "INSERT INTO bookings(booking_id, client_id, offering_id, slot_id, state_name, created_at, last_updated_at, agreed_price) VALUES(?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(booking_id) DO UPDATE SET client_id=excluded.client_id, offering_id=excluded.offering_id, slot_id=excluded.slot_id, state_name=excluded.state_name, created_at=excluded.created_at, last_updated_at=excluded.last_updated_at, agreed_price=excluded.agreed_price";
         try (Connection c = databaseManager.getConnection(); PreparedStatement s = c.prepareStatement(sql)) {
@@ -77,7 +88,7 @@ public class SqliteBookingRepository implements BookingRepository {
             s.setString(5, booking.getStateName());
             s.setString(6, booking.getCreatedAt().toString());
             s.setString(7, booking.getLastUpdatedAt().toString());
-            s.setDouble(8, booking.getAgreedPrice());
+            s.setDouble(8, booking.getPrice());
             s.executeUpdate();
         } catch (Exception e) {
             throw new RuntimeException("Failed to save booking.", e);

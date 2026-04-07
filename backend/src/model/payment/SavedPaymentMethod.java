@@ -1,7 +1,7 @@
-package model.payment;
+package backend.model.payment;
 
-import model.user.Client;
-import util.PaymentMethodType;
+import backend.model.user.Client;
+import backend.util.PaymentMethodType;
 
 public class SavedPaymentMethod {
     private final String savedMethodId;

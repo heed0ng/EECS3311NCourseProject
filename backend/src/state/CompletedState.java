@@ -1,4 +1,4 @@
-package state;
+package backend.state;
 
 public class CompletedState extends AbstractBookingState {
     @Override

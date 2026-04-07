@@ -1,4 +1,4 @@
-package repository.sqlite;
+package backend.repository.sqlite;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import model.user.Client;
-import repository.ClientRepository;
+import backend.model.user.Client;
+import backend.repository.ClientRepository;
 
 public class SqliteClientRepository implements ClientRepository {
     private final DatabaseManager databaseManager;

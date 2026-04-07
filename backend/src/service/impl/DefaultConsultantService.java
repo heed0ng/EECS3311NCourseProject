@@ -1,19 +1,19 @@
-package service.impl;
+package backend.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import model.core.AvailabilitySlot;
-import model.core.Booking;
-import model.core.ConsultantServiceOffering;
-import model.notification.BookingAcceptedEvent;
-import model.notification.BookingRejectedEvent;
-import model.payment.PaymentTransaction;
-import observer.EventPublisher;
-import repository.*;
-import repository.sqlite.IdGenerator;
-import service.ConsultantService;
-import util.*;
+import backend.model.core.AvailabilitySlot;
+import backend.model.core.Booking;
+import backend.model.core.ConsultantServiceOffering;
+import backend.model.notification.BookingAcceptedEvent;
+import backend.model.notification.BookingRejectedEvent;
+import backend.model.payment.PaymentTransaction;
+import backend.observer.EventPublisher;
+import backend.repository.*;
+import backend.repository.sqlite.IdGenerator;
+import backend.service.ConsultantService;
+import backend.util.*;
 
 public class DefaultConsultantService implements ConsultantService {
     private final IdGenerator idGenerator;
@@ -42,11 +42,15 @@ public class DefaultConsultantService implements ConsultantService {
 
     @Override
     public AvailabilitySlot addAvailabilitySlot(String consultantId, LocalDateTime startDateTime, LocalDateTime endDateTime) {
-        var consultant = this.consultantRepository.findById(consultantId).orElseThrow(() -> new EntityNotFoundException("Consultant not found."));
+        var consultant = this.consultantRepository.findById(consultantId)
+                .orElseThrow(() -> new EntityNotFoundException("Consultant not found."));
+
         if (!consultant.isApproved()) throw new AuthorizationException("Consultant is not approved.");
         if (!startDateTime.isBefore(endDateTime)) throw new BusinessRuleViolationException("Slot start time must be before end time.");
+
+        if (!startDateTime.isAfter(LocalDateTime.now())) throw new BusinessRuleViolationException("Availability slot start time must be after than right now.");
         for (AvailabilitySlot slot : this.slotRepository.findByConsultant(consultantId)) {
-            if (slot.overlaps(startDateTime, endDateTime)) throw new BusinessRuleViolationException("Overlapping slot detected.");
+            if (this.blocksAvailabilityOverlap(slot) && slot.overlaps(startDateTime, endDateTime)) throw new BusinessRuleViolationException("Overlapping slot detected.");
         }
 
         String slotId = this.idGenerator.nextId("availability_slots", "slot_id", "slot");
@@ -54,22 +58,80 @@ public class DefaultConsultantService implements ConsultantService {
         this.slotRepository.save(slot);
         return slot;
     }
+    
+    @Override
+    public AvailabilitySlot removeAvailabilitySlot(String consultantId, String slotId) {
+        AvailabilitySlot slot = this.slotRepository.findById(slotId)
+                .orElseThrow(() -> new EntityNotFoundException("Availability slot not found."));
 
+        if (!slot.isOwnedBy(consultantId)) throw new AuthorizationException("Availability slot does not belong to the consultant.");
+        if (!slot.isAvailable()) throw new BusinessRuleViolationException("Only currently available slots can be removed.");
+        if (this.bookingRepository.hasNonTerminalBookingForSlot(slotId)) throw new BusinessRuleViolationException("Availability slot cannot be removed because it is tied to an active booking.");
+
+        slot.setAvailable(false);
+        this.slotRepository.save(slot);
+        return slot;
+    }
+
+    @Override
+    public AvailabilitySlot updateAvailabilitySlot(String consultantId, String slotId, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+
+        AvailabilitySlot slot = this.slotRepository.findById(slotId).orElseThrow(() -> new EntityNotFoundException("Availability slot not found."));
+
+        if (!slot.isOwnedBy(consultantId)) throw new AuthorizationException("Availability slot does not belong to the consultant.");
+        if (!slot.isAvailable()) throw new BusinessRuleViolationException("Only currently available slots can be updated.");
+        if (this.bookingRepository.hasNonTerminalBookingForSlot(slotId)) throw new BusinessRuleViolationException("Availability slot cannot be updated because it is tied to an active booking.");
+        if (!startDateTime.isBefore(endDateTime))  throw new BusinessRuleViolationException("Slot start time must be before end time.");
+        for (AvailabilitySlot otherSlot : this.slotRepository.findByConsultant(consultantId)) {
+            if (otherSlot.getSlotId().equals(slotId)) continue;
+            if (this.blocksAvailabilityOverlap(otherSlot) && otherSlot.overlaps(startDateTime, endDateTime)) {
+                throw new BusinessRuleViolationException("Updated slot would overlap with another active slot.");
+            }
+        }
+        if (!startDateTime.isAfter(LocalDateTime.now())) throw new BusinessRuleViolationException("Availability slot start time must be after than right now.");
+       
+        slot.setStartDateTime(startDateTime);
+        slot.setEndDateTime(endDateTime);
+        this.slotRepository.save(slot);
+        return slot;
+    }
+    
     @Override
     public ConsultantServiceOffering addServiceOffering(String consultantId, String serviceId, Double customPrice) {
         var consultant = this.consultantRepository.findById(consultantId).orElseThrow(() -> new EntityNotFoundException("Consultant not found."));
-        if (!consultant.isApproved()) throw new AuthorizationException("Consultant is not approved.");
-        var pricingPolicy = this.policyRepository.getPricingPolicy();
-        if (!pricingPolicy.isAllowConsultantCustomPrice()) customPrice = null;
-        var service = consultingServiceRepository.findById(serviceId).orElseThrow(() -> new EntityNotFoundException("Consulting service not found."));
 
-        boolean duplicateExists = offeringRepository.findByConsultant(consultantId).stream().anyMatch(existingOffering ->
+        if (!consultant.isApproved()) throw new AuthorizationException("Consultant is not approved.");
+        if (customPrice != null && customPrice < 0.0) throw new BusinessRuleViolationException("Custom price must be zero or greater.");
+        var pricingPolicy = this.policyRepository.getPricingPolicy();
+        if (!pricingPolicy.isAllowConsultantCustomPrice() && customPrice != null) throw new BusinessRuleViolationException("Custom price is blocked by administrator.");
+
+        var service = this.consultingServiceRepository.findById(serviceId).orElseThrow(() -> new EntityNotFoundException("Consulting service not found."));
+
+        boolean duplicateExists = this.offeringRepository.findByConsultant(consultantId).stream().anyMatch(existingOffering ->
                         existingOffering.isActive() && existingOffering.getConsultingService().getServiceId().equals(serviceId));
 
         if (duplicateExists) throw new BusinessRuleViolationException("Consultant already has an active offering for this consulting service.");
-        
+
         String offeringId = this.idGenerator.nextId("consultant_service_offerings", "offering_id", "offering");
         ConsultantServiceOffering offering = new ConsultantServiceOffering(offeringId, consultant, service, customPrice, true);
+
+        this.offeringRepository.save(offering);
+        return offering;
+    }
+    
+    @Override
+    public ConsultantServiceOffering removeServiceOffering(String consultantId, String offeringId) {
+        ConsultantServiceOffering offering = this.offeringRepository.findById(offeringId)
+                .orElseThrow(() -> new EntityNotFoundException("Service offering not found."));
+
+        if (offering.getConsultant() == null || offering.getConsultant().getUserId() == null
+                || !offering.getConsultant().getUserId().equals(consultantId)) {
+            throw new AuthorizationException("Service offering does not belong to the consultant.");
+        }
+
+        if (!offering.isActive()) throw new BusinessRuleViolationException("Service offering is already inactive.");
+
+        offering.setActive(false);
         this.offeringRepository.save(offering);
         return offering;
     }
@@ -97,8 +159,8 @@ public class DefaultConsultantService implements ConsultantService {
 
         if (policyRepository.getNotificationPolicy().isNotifyOnBookingAccepted()) {
             this.eventPublisher.publish(
-                new BookingAcceptedEvent(eventPublisher.nextEventId(), LocalDateTime.now(),"Booking " + booking.getBookingId() + 
-                		" was accepted and moved to pending payment."));
+                new BookingAcceptedEvent(eventPublisher.nextEventId(), LocalDateTime.now(),"Booking " + booking.getBookingId() +
+                        " was accepted and moved to pending payment.", booking.getClient().getUserId(), booking.getOffering().getConsultant().getUserId(), null));
         }
         return booking;
     }
@@ -114,7 +176,7 @@ public class DefaultConsultantService implements ConsultantService {
 
         if (policyRepository.getNotificationPolicy().isNotifyOnBookingRejected()) {
             eventPublisher.publish(new BookingRejectedEvent(eventPublisher.nextEventId(), LocalDateTime.now(),
-                    "Booking " + booking.getBookingId() + " was rejected by the consultant."));
+                    "Booking " + booking.getBookingId() + " was rejected by the consultant.", booking.getClient().getUserId(), booking.getOffering().getConsultant().getUserId(), null));
         }
         return booking;
     }
@@ -145,6 +207,10 @@ public class DefaultConsultantService implements ConsultantService {
 //    }
 //    
     
+    private boolean blocksAvailabilityOverlap(AvailabilitySlot slot) {
+        return slot.isAvailable() || this.bookingRepository.hasNonTerminalBookingForSlot(slot.getSlotId());
+    }
+    
     private void ensureOwner(String consultantId, Booking booking) {
         if (!booking.belongsToConsultant(consultantId)) throw new AuthorizationException("Booking does not belong to the consultant.");
     }
@@ -157,7 +223,7 @@ public class DefaultConsultantService implements ConsultantService {
 
         String transactionId = idGenerator.nextId("payment_transactions", "transaction_id", "transaction");
         PaymentTransaction pendingTransaction = new PaymentTransaction(transactionId, booking, booking.getClient(), PaymentTransactionType.PAYMENT,
-                PaymentTransactionStatus.PENDING, PaymentMethodType.NONE_SELECTED, booking.getAgreedPrice(), LocalDateTime.now());
+                PaymentTransactionStatus.PENDING, PaymentMethodType.NONE_SELECTED, booking.getPrice(), LocalDateTime.now());
         this.paymentTransactionRepository.save(pendingTransaction);
     }
 }

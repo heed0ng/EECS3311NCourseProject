@@ -1,6 +1,6 @@
-package model.user;
+package backend.model.user;
 
-import util.ConsultantApprovalStatus;
+import backend.util.ConsultantApprovalStatus;
 
 public class Consultant extends User {
     private ConsultantApprovalStatus approvalStatus;

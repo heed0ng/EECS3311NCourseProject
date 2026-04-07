@@ -1,7 +1,7 @@
-package paymentStrategy;
+package backend.paymentStrategy;
 
-import util.BusinessRuleViolationException;
-import util.PaymentMethodType;
+import backend.util.BusinessRuleViolationException;
+import backend.util.PaymentMethodType;
 
 public class PaymentStrategyFactory {
     public PaymentMethodStrategy create(PaymentMethodType paymentMethodType) {

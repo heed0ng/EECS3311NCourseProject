@@ -1,4 +1,4 @@
-package model.policy;
+package backend.model.policy;
 
 public class CustomPricingPolicy {
     private final String policyId;

@@ -1,9 +1,9 @@
-package repository;
+package backend.repository;
 
-import model.policy.CancellationPolicy;
-import model.policy.NotificationPolicy;
-import model.policy.CustomPricingPolicy;
-import model.policy.RefundPolicy;
+import backend.model.policy.CancellationPolicy;
+import backend.model.policy.NotificationPolicy;
+import backend.model.policy.CustomPricingPolicy;
+import backend.model.policy.RefundPolicy;
 
 public interface PolicyRepository {
     CancellationPolicy getCancellationPolicy();

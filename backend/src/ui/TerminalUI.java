@@ -1,20 +1,20 @@
-package ui;
+package backend.ui;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 
-import model.core.*;
-import model.payment.*;
-import model.user.*;
-import observer.*;
-import paymentStrategy.PaymentStrategyFactory;
-import repository.*;
-import repository.sqlite.*;
-import util.*;
-import service.*;
-import service.impl.*;
+import backend.model.core.*;
+import backend.model.payment.*;
+import backend.model.user.*;
+import backend.observer.*;
+import backend.paymentStrategy.PaymentStrategyFactory;
+import backend.repository.*;
+import backend.repository.sqlite.*;
+import backend.util.*;
+import backend.service.*;
+import backend.service.impl.*;
 
 public class TerminalUI {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -38,7 +38,7 @@ public class TerminalUI {
     private final AdminRepository adminRepository;
 
     public TerminalUI() {
-        String databaseFilePath = System.getProperty("user.dir") + "/booking_platform_phase1.db";
+    	String databaseFilePath = DatabasePaths.databaseFilePath();
         this.databaseManager = new DatabaseManager(databaseFilePath);
         new SchemaInitializer(databaseManager).initialize();
         this.eventPublisher = new EventPublisher();
@@ -71,15 +71,15 @@ public class TerminalUI {
         this.adminService = new DefaultAdminService(adminRepository, consultantRepository, policyRepository, eventPublisher);
     }
     
-    public static void main(String[] args) {
-        new TerminalUI().run();
-    }
+//    public static void main(String[] args) {
+//        new TerminalUI().run();
+//    }
 
     public void run() {
         seedDemoDataIfNeeded();
         subscribeDefaultObservers();
         System.out.println("Service Booking and Consulting Platform - Phase 1 Backend Demo");
-        System.out.println("Database file: booking_platform_phase1.db");
+        System.out.println("Database file: " + DatabasePaths.DATABASE_FILE_NAME);
         printDemoIds();
         while (true) {
             System.out.println("\nMain Menu");
@@ -331,7 +331,7 @@ public class TerminalUI {
         System.out.println("Removed saved payment method: " + savedMethodId);
     }
 
-    private void seedDemoDataIfNeeded() {
+    public void seedDemoDataIfNeeded() {
         seedDemoClientsIfMissing();
         seedDemoConsultantsIfMissing();
         seedDemoServicesIfMissing();
@@ -350,9 +350,14 @@ public class TerminalUI {
         if (consultantRepository.findById("consultant-1").isEmpty()) {
             consultantRepository.save(new Consultant("consultant-1", "Charlie Consultant", "char@example.com", ConsultantApprovalStatus.APPROVED));
         }
-
         if (consultantRepository.findById("consultant-2").isEmpty()) {
             consultantRepository.save(new Consultant("consultant-2", "Dr. Doom Consultant", "doom@example.com", ConsultantApprovalStatus.PENDING));
+        }
+        if (consultantRepository.findById("consultant-3").isEmpty()) {
+            consultantRepository.save(new Consultant("consultant-3", "Eric Consultant", "eric@example.com", ConsultantApprovalStatus.PENDING));
+        }
+        if (consultantRepository.findById("consultant-4").isEmpty()) {
+            consultantRepository.save(new Consultant("consultant-4", "Fred Consultant", "fred@example.com", ConsultantApprovalStatus.PENDING));
         }
     }
 
@@ -360,15 +365,12 @@ public class TerminalUI {
         if (consultingServiceRepository.findById("service-1").isEmpty()) {
             consultingServiceRepository.save(new ConsultingService("service-1", "Software Design Consulting", "UML, patterns, architecture review.", 60, 120.0, true));
         }
-
         if (consultingServiceRepository.findById("service-2").isEmpty()) {
             consultingServiceRepository.save(new ConsultingService("service-2", "Career Coaching", "Interview and resume consultation.", 45, 90.0, true));
         }
-        
         if (consultingServiceRepository.findById("service-3").isEmpty()) {
             consultingServiceRepository.save(new ConsultingService("service-3", "Medical Checkup", "Basic Medical Checkup routine.", 50, 500.0, true));
         }
-        
         if (consultingServiceRepository.findById("service-4").isEmpty()) {
             consultingServiceRepository.save(new ConsultingService("service-4", "Time Management Coaching", "Weekly/Monthly/Yearly Time managing strategy setup.", 30, 60.0, true));
         }
@@ -384,9 +386,14 @@ public class TerminalUI {
         if (offeringRepository.findById("offering-1").isEmpty()) {
             offeringRepository.save(new ConsultantServiceOffering("offering-1", consultant, service1, 140.0, true));
         }
-
         if (offeringRepository.findById("offering-2").isEmpty()) {
-            offeringRepository.save(new ConsultantServiceOffering("offering-2", consultant, service2, null, true));
+            offeringRepository.save(new ConsultantServiceOffering("offering-2", consultant, service2, 10000.0, true));
+        }
+        if (offeringRepository.findById("offering-3").isEmpty()) {
+            offeringRepository.save(new ConsultantServiceOffering("offering-3", consultant, service3, null, true));
+        }
+        if (offeringRepository.findById("offering-4").isEmpty()) {
+            offeringRepository.save(new ConsultantServiceOffering("offering-4", consultant, service4, null, true));
         }
     }
 
@@ -403,9 +410,18 @@ public class TerminalUI {
         LocalDateTime slot3Start = LocalDateTime.now().plusDays(2).withHour(14).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime slot3End = LocalDateTime.now().plusDays(2).withHour(15).withMinute(0).withSecond(0).withNano(0);
 
+        LocalDateTime slot4Start = LocalDateTime.now().plusDays(3).withHour(16).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime slot4End = LocalDateTime.now().plusDays(3).withHour(17).withMinute(0).withSecond(0).withNano(0);
+
+        LocalDateTime slot5Start = LocalDateTime.now().plusDays(10).withHour(10).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime slot5End = LocalDateTime.now().plusDays(10).withHour(11).withMinute(0).withSecond(0).withNano(0);
+
+        
         if (slotRepository.findById("slot-1").isEmpty()) slotRepository.save(new AvailabilitySlot("slot-1", consultant, slot1Start, slot1End, true));
         if (slotRepository.findById("slot-2").isEmpty()) slotRepository.save(new AvailabilitySlot("slot-2", consultant, slot2Start, slot2End, true));
         if (slotRepository.findById("slot-3").isEmpty()) slotRepository.save(new AvailabilitySlot("slot-3", consultant, slot3Start, slot3End, true));
+        if (slotRepository.findById("slot-4").isEmpty()) slotRepository.save(new AvailabilitySlot("slot-4", consultant, slot4Start, slot4End, true));
+        if (slotRepository.findById("slot-5").isEmpty()) slotRepository.save(new AvailabilitySlot("slot-5", consultant, slot5Start, slot5End, true));
     }
 
     private void seedDemoPaymentMethodsIfMissing() {
@@ -413,9 +429,11 @@ public class TerminalUI {
         if (!hasAliceVisa) paymentService.addSavedPaymentMethod("client-1", PaymentMethodType.CREDIT_CARD, "Alice Visa", "1111111111111111", "12/30|123");
         boolean hasAlicePaypal = paymentService.getSavedPaymentMethods("client-1").stream().anyMatch(method -> "Alice PayPal".equals(method.getDisplayLabel()));
         if (!hasAlicePaypal) paymentService.addSavedPaymentMethod("client-1", PaymentMethodType.PAYPAL, "Alice PayPal", "alice@example.com", "");
+        boolean hasAliceDebit = paymentService.getSavedPaymentMethods("client-1").stream().anyMatch(method -> "Delete/Update Me".equals(method.getDisplayLabel()));
+        if (!hasAliceDebit) paymentService.addSavedPaymentMethod("client-1", PaymentMethodType.DEBIT_CARD, "Delete/Update Me", "2222222222222222", "12/30|123");
     }
 
-    private void subscribeDefaultObservers() {
+    public void subscribeDefaultObservers() {
         System.out.println("[Startup] Subscribing console demo observers from seeded persisted users.");
 
         consultantRepository.findById("consultant-1").ifPresent(consultant -> eventPublisher.subscribe(new ConsultantObserver("observer-consultant-" + consultant.getUserId(), consultant.getName())));
@@ -473,7 +491,7 @@ public class TerminalUI {
             return;
         }
         for (Booking booking : bookings) {
-            System.out.println(booking.getBookingId() + " | client=" + booking.getClient().getName() + " | consultant=" + booking.getOffering().getConsultant().getName() + " | service=" + booking.getOffering().getConsultingService().getName() + " | state=" + booking.getStateName() + " | price=$" + booking.getAgreedPrice());
+            System.out.println(booking.getBookingId() + " | client=" + booking.getClient().getName() + " | consultant=" + booking.getOffering().getConsultant().getName() + " | service=" + booking.getOffering().getConsultingService().getName() + " | state=" + booking.getStateName() + " | price=$" + booking.getPrice());
         }
     }
 
