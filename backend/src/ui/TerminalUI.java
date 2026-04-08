@@ -39,7 +39,7 @@ public class TerminalUI {
 
     public TerminalUI() {
     	String databaseFilePath = DatabasePaths.databaseFilePath();
-        this.databaseManager = new DatabaseManager(databaseFilePath);
+        this.databaseManager = null;
         new SchemaInitializer(databaseManager).initialize();
         this.eventPublisher = new EventPublisher();
         SqliteAdminRepository sqliteAdminRepository = new SqliteAdminRepository(databaseManager);

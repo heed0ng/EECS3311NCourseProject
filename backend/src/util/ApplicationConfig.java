@@ -13,19 +13,24 @@ import backend.repository.*;
 import backend.repository.sqlite.*;
 import backend.service.*;
 import backend.service.impl.*;
-import backend.ui.TerminalUI;
 import backend.ai.GroqChatClient;
 
 @Configuration
 public class ApplicationConfig {
 
-    @Bean
-    public DatabaseManager databaseManager() {
-    		String databaseFilePath = DatabasePaths.databaseFilePath();
-        DatabaseManager databaseManager = new DatabaseManager(databaseFilePath);
-        new SchemaInitializer(databaseManager).initialize();
-        return databaseManager;
-    }
+	@Bean
+	public DatabaseManager databaseManager() {
+	    String host = getEnvOrDefault("DB_HOST", "localhost");
+	    int port = Integer.parseInt(getEnvOrDefault("DB_PORT", "5432"));
+	    String databaseName = getEnvOrDefault("DB_NAME", "sbcp");
+	    String username = getEnvOrDefault("DB_USER", "sbcp_user");
+	    String password = getEnvOrDefault("DB_PASSWORD", "sbcp_pass");
+
+	    DatabaseManager databaseManager = new DatabaseManager(host, port, databaseName, username, password);
+
+	    new SchemaInitializer(databaseManager).initialize();
+	    return databaseManager;
+	}
 
     @Bean
     public EventPublisher eventPublisher() {
@@ -170,15 +175,17 @@ public class ApplicationConfig {
         };
     }
     
+    private String getEnvOrDefault(String key, String defaultValue) {
+        String value = System.getenv(key);
+        return (value == null || value.isBlank()) ? defaultValue : value;
+    }
+    
     @Bean
     public DemoDataInitializer demoDataInitializer(AdminRepository adminRepository, ClientRepository clientRepository,
         ConsultantRepository consultantRepository, ConsultingServiceRepository consultingServiceRepository,
         ConsultantServiceOfferingRepository consultantServiceOfferingRepository, AvailabilitySlotRepository availabilitySlotRepository,
-        BookingRepository bookingRepository, SavedPaymentMethodRepository savedPaymentMethodRepository,
-        PaymentTransactionRepository paymentTransactionRepository, PolicyRepository policyRepository) {
+        PaymentService paymentService) {
         return new DemoDataInitializer(adminRepository, clientRepository, consultantRepository, consultingServiceRepository,
-            consultantServiceOfferingRepository, availabilitySlotRepository, bookingRepository, savedPaymentMethodRepository,
-            paymentTransactionRepository, policyRepository);
+            consultantServiceOfferingRepository, availabilitySlotRepository, paymentService);
     }
-    
 }

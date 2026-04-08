@@ -38,7 +38,7 @@ public class GroqChatClient {
         try {
             ObjectNode requestBody = this.objectMapper.createObjectNode();
             requestBody.put("model", this.model);
-            requestBody.put("temperature", 0.1);
+            requestBody.put("temperature", 0.25);
 
             ArrayNode messages = requestBody.putArray("messages");
 
