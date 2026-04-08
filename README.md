@@ -32,7 +32,7 @@ The project follows a layered structure.
 
 * **`api`**: REST controllers, request/response DTOs, and DTO mappers
 * **`service` / `service.impl`**: business logic for booking, consultant, payment, admin, and assistant workflows
-* **`repository` / `repository.sqlite`**: persistence interfaces and SQLite implementations
+* **`repository` / `repository.sqlite`**: persistence interfaces and PostgreSQL implementation (package name is still sqlite)
 * **`model`**: domain entities for bookings, users, policies, payments, and notification events
 * **`state`**: booking lifecycle states
 * **`paymentStrategy`**: payment-method-specific validation/processing strategies
@@ -53,7 +53,7 @@ Docker Compose starts three services:
 
 * **backend**: Spring Boot API
 * **frontend**: Nginx serving static files(HTML/CSS/JS)
-* **database**: Container holding persisted SQLite volume
+* **database**: Container holding persisted SQL data volume, running PostgreSQL server
 
 ## 3\. Design Patterns Used
 
@@ -117,7 +117,7 @@ Key classes:
 
 #### Simple Repository Pattern for database
 
-Persistence is separated from business logic through repository interfaces and SQLite-backed implementations.
+Persistence is separated from business logic through repository interfaces and SQL implementations.
 
 #### Minimal MVC(Model - View - Controller)
 
@@ -199,7 +199,7 @@ EECS3311NCourseProject/
 
 ### Requirements
 
-* Docker Desktop installed and running
+* Docker Desktop
 
 ### Environment setup
 
@@ -215,13 +215,14 @@ docker compose up --build
 2. Access the application
 * Frontend: `http://localhost:8081`
 * Backend API: `http://localhost:8080`
+* PostgreSQL: `:5432`
 
 
 
 3. Stop the system
 
 ```bash
-docker compose down
+docker compose down (-v)
 ```
 
 
@@ -248,6 +249,5 @@ Available under `diagrams/PlantUMLs/`:
 ## 9\.  Limitations
 
 * AI retrieval is **simple/manual faked RAG**, not vector-database-based retrieval
-* SQLite is kept instead of actual SQL server running on the Database Server
 * UI styling is minimal and **NOT** production level
 
